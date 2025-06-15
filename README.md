@@ -14,3 +14,6 @@ an Individual Contributor Licence Agreement (one-click via GitHub).
 
 By signing, you permit the project to re-license your contribution in
 both the open-source and proprietary editions.
+
+# All Infomratoin Can Be Found Here:
+linktr.ee/violeta.framework
