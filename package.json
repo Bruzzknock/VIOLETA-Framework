@@ -1,0 +1,26 @@
+{
+  "name": "violeta-framework",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,                       
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bruzzknock/VIOLETA-Framework.git"
+  },
+  "homepage": "https://github.com/Bruzzknock/VIOLETA-Framework#readme",
+  "bugs": {
+    "url": "https://github.com/Bruzzknock/VIOLETA-Framework/issues"
+  },
+  "license": "ISC",
+  "workspaces": ["docs", "hub"],         
+  "scripts": {
+    "dev": "concurrently \"npm --workspace hub run dev\" \"npm --workspace docs run start\"",
+    "build": "npm --workspace hub run build && npm --workspace docs run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": []
+}

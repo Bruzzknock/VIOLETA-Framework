@@ -1,0 +1,16 @@
+{
+  "name": "hub",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev --port 4000",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@iconify-json/mdi": "^1.2.3",
+    "astro": "^5.9.4",
+    "astro-icon": "^1.1.5"
+  }
+}
