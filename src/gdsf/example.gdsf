@@ -1,0 +1,35 @@
+[schema]
+id = S1
+name = "Play Cards"
+property = mechanic
+intrinsic_load = 2
+
+[schema]
+id = C1
+name = "Cards"
+property = component
+
+[schema]
+id = C2
+name = "Daily Board"
+property = component
+
+[schema]
+id = P1
+name = "Play Phase"
+property = phase
+
+[edge]
+from = C1
+to = S1
+type = uses_component
+
+[edge]
+from = P1
+to = S1
+type = has_phase
+
+# Metadata
+[meta]
+author = Kristijan
+version = 0.1
