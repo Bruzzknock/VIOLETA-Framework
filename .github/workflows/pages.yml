@@ -32,15 +32,15 @@ jobs:
       # ---- 3. Merge docs into /dist/docs
       - name: Copy docs into marketing dist
         run: |
-          mkdir -p src/hub/dist/docs
-          cp -r src/docs/build/* src/hub/dist/docs/
+          mkdir -p hub/dist/docs
+          rsync -a docs/build/ hub/dist/docs/
 
       # ---- 4. Upload to GitHub Pages
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # point to Astro’s dist, now containing docs/
-          path: src/hub/dist
+          path: hub/dist
 
       - name: Deploy
         uses: actions/deploy-pages@v4
