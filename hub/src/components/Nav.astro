@@ -3,9 +3,8 @@ import { Github } from 'lucide-astro';
 
 const links = [
   { name: 'Features', href: '#features' },
-  { name: 'Showcase', href: '/showcase' },
-  { name: 'Blog', href: '/blog' },
-  { name: 'Docs', href: '/docs/intro' },   // points into Docusaurus
+  { name: 'Blog', href: 'https://medium.com/me/stories/public' },
+  { name: 'Docs', href: '/docs/' },   // points into Docusaurus
 ];
 ---
 <header class="sticky top-0 z-50 backdrop-blur bg-white/70 dark:bg-slate-900/70 border-b">
@@ -15,13 +14,30 @@ const links = [
       VIOLETA
     </a>
 
-    <ul class="hidden md:flex items-center gap-6 text-sm">
-      {links.map(({ name, href }) => (
-        <li><a href={href} class="hover:text-indigo-600">{name}</a></li>
-      ))}
+<ul class="hidden md:flex items-center gap-6 text-sm">
+      {links.map(({ name, href }) => {
+        const isExternal = href.startsWith('http');
+        return (
+          <li>
+            <a
+              href={href}
+              class="hover:text-indigo-600"
+              target={isExternal ? '_blank' : undefined}
+              rel={isExternal ? 'noopener noreferrer' : undefined}
+            >
+              {name}
+            </a>
+          </li>
+        );
+      })}
       <li>
-        <a href="https://github.com/Bruzzknock/VIOLETA-Framework" class="flex items-center gap-1 hover:text-indigo-600">
-          <Github class="size-4" /> Star
+        <a
+          href="https://github.com/Bruzzknock/VIOLETA-Framework"
+          class="flex items-center gap-1 hover:text-indigo-600"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Github class="size-4" /> Repo
         </a>
       </li>
     </ul>
