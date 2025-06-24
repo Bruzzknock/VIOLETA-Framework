@@ -1,0 +1,46 @@
+name: Deploy Marketing + Docs to GitHub Pages
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ---- Install once for both workspaces
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # ---- 1. Build Astro (marketing site)
+      - run: npm --workspace hub run build
+
+      # ---- 2. Build Docusaurus (docs)
+      - run: npm --workspace docs run build
+
+      # ---- 3. Merge docs into /dist/docs
+      - name: Copy docs into marketing dist
+        run: |
+          mkdir -p src/hub/dist/docs
+          cp -r src/docs/build/* src/hub/dist/docs/
+
+      # ---- 4. Upload to GitHub Pages
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # point to Astro’s dist, now containing docs/
+          path: src/hub/dist
+
+      - name: Deploy
+        uses: actions/deploy-pages@v4
