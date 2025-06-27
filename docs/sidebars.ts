@@ -28,6 +28,16 @@ const sidebars: SidebarsConfig = {
     },
   ],
    */
+  theorySidebar: [
+    {
+      type: 'category',
+      label: 'Theory',
+      link: {type: 'doc', id: 'theory/intro'},
+      items: [
+        'theory/intro',
+      ],
+    },
+  ],
 };
 
 export default sidebars;

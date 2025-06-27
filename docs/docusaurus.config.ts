@@ -7,7 +7,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'VIOLETA Docs',
   tagline: 'VIOLETA is a practical blueprint for turning any learning objective into a playable experience in which fun, emotion and adaptive challenge are all deliberately engineered to drive real-world skill mastery.',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/logo.svg',
 
   // Future flags, see https://docusaurus.io/api/docusaurus-config#future
   future: {
@@ -42,6 +42,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          routeBasePath: '/',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
@@ -71,12 +72,12 @@ const config: Config = {
 
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/temp-logo.png',
+    image: 'img/logo.svg',
     navbar: {
       title: 'VIOLETA Docs',
       logo: {
-        alt: 'VIOLETA Temp Logo',
-        src: 'img/temp-logo.png',
+        alt: 'VIOLETA Logo',
+        src: 'img/logo.svg',
       },
       items: [
         {
@@ -85,9 +86,15 @@ const config: Config = {
           position: 'left',
           label: 'Tutorial',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/facebook/docusaurus',
+          type: 'docSidebar',       // <— NEW
+          sidebarId: 'theorySidebar',
+          position: 'left',
+          label: 'Theory',
+        },
+        {href: 'https://medium.com/@kristijan.djokic', label: 'Blog', position: 'left'},
+        {
+          href: 'https://github.com/Bruzzknock/VIOLETA-Framework',
           label: 'GitHub',
           position: 'right',
         },
@@ -100,8 +107,8 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
-              to: '/intro',
+              label: 'Theory',
+              to: '/theory',
             },
           ],
         },
@@ -109,16 +116,12 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-            },
-            {
               label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
+              href: 'https://discord.gg/KbShmvV8fv',
             },
             {
-              label: 'X',
-              href: 'https://x.com/docusaurus',
+              label: 'Reddit',
+              href: 'https://www.reddit.com/r/VIOLETAFramework/',
             },
           ],
         },
@@ -127,16 +130,16 @@ const config: Config = {
           items: [
             {
               label: 'Blog',
-              to: '/blog',
+              href: 'https://medium.com/@kristijan.djokic',
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              href: 'https://github.com/Bruzzknock/VIOLETA-Framework',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} VIOLETA Framework, Inc. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
