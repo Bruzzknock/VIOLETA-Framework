@@ -35,6 +35,7 @@ const sidebars: SidebarsConfig = {
       link: {type: 'doc', id: 'theory/intro'},
       items: [
         'theory/intro',
+        'theory/walkthrough'
       ],
     },
   ],
