@@ -81,12 +81,6 @@ const config: Config = {
       },
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Tutorial',
-        },
-        {
           type: 'docSidebar',       // <— NEW
           sidebarId: 'theorySidebar',
           position: 'left',
@@ -96,6 +90,10 @@ const config: Config = {
         {
           href: 'https://github.com/Bruzzknock/VIOLETA-Framework',
           label: 'GitHub',
+          position: 'right',
+        },
+        {
+          type: 'docsVersionDropdown',
           position: 'right',
         },
       ],
