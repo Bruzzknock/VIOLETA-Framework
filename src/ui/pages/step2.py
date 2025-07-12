@@ -6,6 +6,15 @@ st.header("Step 2 - Atomic Skills")
 
 atomic_unit = app_utils.load_atomic_unit()
 
+with st.form("step2_form"):
+    atmoic_skills_input = st.text_input(
+        "What knowledge, actions, and/or skills are necessary to master this atomic unit?"
+    )
+    submitted = st.form_submit_button("Next")
+
+if submitted:
+    app_utils.save_atomic_skills(atmoic_skills_input)
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
