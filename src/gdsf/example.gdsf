@@ -33,3 +33,9 @@ type = has_phase
 [meta]
 author = Kristijan
 version = 0.1
+
+[atomic_unit]
+value = "Cybersecurity"
+
+[atomic_skills]
+value = "{ {} }"

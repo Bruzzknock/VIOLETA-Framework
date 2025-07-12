@@ -2,6 +2,7 @@ class GDSFParser:
     def __init__(self, filepath):
         self.edges = []
         self.meta = {}
+        self.sections = {}
         self.schemas = []
         self.seen_ids = set()
         self._parse(filepath)
@@ -22,6 +23,8 @@ class GDSFParser:
                         self.edges.append(current)
                     elif section == "meta" and current:
                         self.meta.update(current)
+                    elif section and current:
+                        self.sections[section] = current
                     section = line[1:-1]
                     current = {}
                 else:
@@ -35,6 +38,8 @@ class GDSFParser:
                 self.edges.append(current)
             elif section == "meta":
                 self.meta.update(current)
+            elif section and current:
+                self.sections[section] = current
     
     def _validate_schema(self, schema, line_num):
         prop = schema.get("property").replace(" ", "")
@@ -70,3 +75,6 @@ class GDSFParser:
 
     def get_schemas_by_type(self, property_type):
         return [s for s in self.schemas if s.get("property") == property_type]
+    
+    def get_section(self, name):
+        return self.sections.get(name, {})
