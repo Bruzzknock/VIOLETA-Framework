@@ -2,5 +2,5 @@
 value = "Cybersecurity"
 
 [atomic_skills]
-value = "Basics of computer networks Understanding binary and hexadecimal Cryptography basics"
+value = "{"Use of Productivity Tools": ["Security tools like firewalls and intrusion detection systems", "Scripting for automation (e.g., Python, Bash)"], "Established Techniques": ["Compliance with regulations such as GDPR, HIPAA", "Implementation of security frameworks (NIST, ISO 27001)", "Threat modeling and risk assessment"], "Personal Skills": ["Effective communication for incident reporting", "Problem-solving under pressure during breaches", "Continuous learning to stay updated with evolving threats"], "Build Sustainable Habits": ["Regular updates of security measures", "Conducting routine vulnerability assessments", "Ensuring robust backups and disaster recovery plans", "This structure ensures a cohesive learning experience, coverin"]}"
 
