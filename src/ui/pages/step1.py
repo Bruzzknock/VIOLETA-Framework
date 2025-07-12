@@ -22,7 +22,8 @@ for message in st.session_state.messages:
 prompt = st.chat_input("Generate Ideas")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
-    answer = ai.step1(st.session_state.messages)
+    with st.spinner("Generating answer..."):
+        answer = ai.step1(st.session_state.messages)
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)
