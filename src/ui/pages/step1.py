@@ -1,6 +1,6 @@
 import streamlit as st
 import time
-from ui import app_utils
+import app_utils
 
 st.header("Step 1 - Atomic unit")
 
@@ -11,4 +11,4 @@ with st.form("step1_form"):
     submitted = st.form_submit_button("Next")
 
 if submitted:
-    save(atmoic_unit_input)
+    app_utils.save(atmoic_unit_input)
