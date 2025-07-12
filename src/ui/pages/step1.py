@@ -11,7 +11,7 @@ with st.form("step1_form"):
     submitted = st.form_submit_button("Next")
 
 if submitted:
-    app_utils.save(atmoic_unit_input)
+    app_utils.save_atomic_unit(atmoic_unit_input)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
