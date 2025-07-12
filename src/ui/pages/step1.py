@@ -16,15 +16,10 @@ if submitted:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-generate = st.button("Generate Ideas")
-if generate:
-    answer = ai.step1(st.session_state.messages)
-    st.session_state.messages.append({"role": "assistant", "content": answer})
-
 for message in st.session_state.messages:
     st.chat_message(message["role"]).write(message["content"])
 
-prompt = st.chat_input("Ask for help!")
+prompt = st.chat_input("Generate Ideas")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     answer = ai.step1(st.session_state.messages)

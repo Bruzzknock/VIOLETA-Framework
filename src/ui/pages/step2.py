@@ -6,8 +6,16 @@ st.header("Step 2 - Atomic Skills")
 
 atomic_unit = app_utils.load("TODO")
 
-generate = st.button("Generate Ideas")
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-if(generate):
-    atomic_skills = ai.step2(atomic_unit)
-    atomic_skills
+for message in st.session_state.messages:
+    st.chat_message(message["role"]).write(message["content"])
+
+prompt = st.chat_input("Generate Ideas")
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    answer = ai.step2(atomic_unit, st.session_state.messages)
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    st.chat_message("user").write(prompt)
+    st.chat_message("assistant").write(answer)
