@@ -3,6 +3,20 @@ dist/
 build/
 .vscode/
 
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+
 # Generated files
 .docusaurus
 .cache-loader

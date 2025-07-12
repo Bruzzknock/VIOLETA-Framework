@@ -1,0 +1,7 @@
+streamlit
+streamlit-flow
+pandas
+pydantic
+plotly
+langchain
+langchain-ollama
