@@ -4,7 +4,7 @@ import ai
 
 st.header("Step 2 - Atomic Skills")
 
-atomic_unit = app_utils.load("TODO")
+atomic_unit = app_utils.load_atomic_unit()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
