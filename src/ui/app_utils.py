@@ -36,11 +36,48 @@ def load_atomic_unit() -> str:
     return data.get("atomic_unit", {}).get("value", "")
 
 
-def save_atomic_skills(skills) -> None:
-    if not isinstance(skills, str):
-        skills = json.dumps(skills)
+def _parse_atomic_skills(text: str):
+    """Parse user input for atomic skills.
+
+    Input may contain categories separated by blank lines. The first
+    non-empty line after a blank line is treated as a new category. If no
+    blank lines are present, all lines are returned as a simple list."""
+
+    lines = [line.strip() for line in text.splitlines()]
+    lines = [l for l in lines if l is not None]  # just keep list
+
+    # filter leading/trailing empty lines
+    while lines and lines[0] == "":
+        lines.pop(0)
+    while lines and lines[-1] == "":
+        lines.pop()
+
+    if not lines:
+        return []
+
+    has_blank = any(line == "" for line in lines)
+    if not has_blank:
+        # No blank lines -> treat all as skill list
+        return [line for line in lines]
+
+    skills = {}
+    current = None
+    for line in lines:
+        if line == "":
+            current = None
+            continue
+        if current is None:
+            current = line
+            skills[current] = []
+        else:
+            skills[current].append(line)
+    return skills
+
+
+def save_atomic_skills(skills: str) -> None:
+    parsed = _parse_atomic_skills(skills)
     data = _load_data()
-    data["atomic_skills"] = {"value": skills}
+    data["atomic_skills"] = {"value": json.dumps(parsed)}
     _save_data(data)
 
 
