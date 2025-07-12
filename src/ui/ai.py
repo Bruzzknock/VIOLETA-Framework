@@ -1,38 +1,31 @@
 import re
-from langchain_ollama import OllamaLLM
-from langchain_core.prompts import PromptTemplate
 import os
+from typing import List, Dict
+
 from dotenv import load_dotenv
+from langchain_ollama import ChatOllama, OllamaLLM
+from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.prompts import PromptTemplate
 
 load_dotenv(override=True)
-p = os.environ['OLLAMA_HOST']
-print(p)
 
-def step1() -> str:
-        template = """ Theory about what Atomic Unit is:
-“What is the atomic unit that the game should be based on?”
-An atomic unit, as defined in the framework, refers to a bundled set of
-real-world knowledge, behaviors, or skills that should be learned together as
-a cohesive whole. It is the educational “nucleus” of the game—what the game
-aims to teach or train, not as isolated trivia, but as a functional, applicable
-cluster of competencies.
-Atomic units can vary greatly in complexity. They may be as narrow
-as a single soft skill—such as assertive communication or basic mental
-arithmetic—or as broad as an entire interdisciplinary domain, such as
-systems thinking or quantum physics. The choice of atomic unit depends on
-the designer’s educational goals, target audience, and contextual constraints.
+def step1(messages: List[Dict[str, str]]) -> str:
+        """Return a chat-based response for choosing an atomic unit."""
+        system_prompt = "Theory about what Atomic Unit is:"
+        model = ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
 
-An Atomic Unit is wider than a single learning objective – it bundles related, 
-mutually‑reinforcing skills so the player practises them as a coherent package. 
-By surfacing the whole bundle early you make it obvious what "good play" will look 
-like in real life.
+        lc_messages = [HumanMessage(content=system_prompt)]
+        for msg in messages:
+                if msg["role"] == "user":
+                        lc_messages.append(HumanMessage(content=msg["content"]))
+                else:
+                        lc_messages.append(AIMessage(content=msg["content"]))
 
-Generate 3 ideas for atomic unit."""
-        prompt = PromptTemplate.from_template(template)
-        model = OllamaLLM(model="deepseek-r1:14b",
-                          base_url=os.environ['OLLAMA_HOST'])
-        chain = prompt | model
-        return remove_think_block(chain.invoke({}))
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)
 
 def remove_think_block(text: str) -> str:
         return re.sub(r"<think>.*?</think>\s*","", text, flags=re.DOTALL)
