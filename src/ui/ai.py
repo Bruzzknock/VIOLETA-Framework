@@ -1,6 +1,12 @@
 import re
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
+import os
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+p = os.environ['OLLAMA_HOST']
+print(p)
 
 def step1() -> str:
         template = """ Theory about what Atomic Unit is:
@@ -24,7 +30,7 @@ like in real life.
 Generate 3 ideas for atomic unit."""
         prompt = PromptTemplate.from_template(template)
         model = OllamaLLM(model="deepseek-r1:14b",
-                          base_url="http://127.0.0.1:11434")
+                          base_url=os.environ['OLLAMA_HOST'])
         chain = prompt | model
         return remove_think_block(chain.invoke({}))
 
@@ -94,11 +100,10 @@ relevant to the atomic unit.
 Our Atomic Unit: {atomic_unit}
 
 Generate skills for this atomic unit."""
-        print("IM YELINNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNG -------------------------------------------------------------------- STEP TWO:", atomic_unit)
         prompt = PromptTemplate.from_template(template)
         prompt.format(atomic_unit=atomic_unit)
         model = OllamaLLM(model="deepseek-r1:14b",
-                          base_url="http://127.0.0.1:11434")
+                          base_url=os.environ['OLLAMA_HOST'])
         chain = prompt | model
         return remove_think_block(chain.invoke({"atomic_unit": atomic_unit}))
 
@@ -144,6 +149,6 @@ Generate theme for these atomic unit skills."""
         prompt = PromptTemplate.from_template(template)
         prompt.format(atomic_unit=atomic_unit_skills)
         model = OllamaLLM(model="deepseek-r1:14b",
-                          base_url="http://127.0.0.1:11434")
+                          base_url=os.environ['OLLAMA_HOST'])
         chain = prompt | model
         return remove_think_block(chain.invoke({"atomic_unit": atomic_unit_skills}))
