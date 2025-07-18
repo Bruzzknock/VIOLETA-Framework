@@ -34,10 +34,14 @@ st.text_area(
     height=200,
 )
 
-if st.button("Generate Kernels"):
+def generate_kernels():
     with st.spinner("Generating kernels..."):
-        generated = ai.step2_kernels(atomic_unit, app_utils.load_atomic_skills())
+        generated = ai.step2_kernels(
+            atomic_unit, app_utils.load_atomic_skills()
+        )
     st.session_state.kernels_text = generated
+
+st.button("Generate Kernels", on_click=generate_kernels)
 
 if st.button("Save Kernels"):
     app_utils.save_skill_kernels(st.session_state.kernels_text)
