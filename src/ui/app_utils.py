@@ -99,3 +99,23 @@ def save_theme(theme: str) -> None:
 def load_theme() -> str:
     data = _load_data()
     return data.get("theme", {}).get("value", "")
+
+
+def save_skill_kernels(kernels: str) -> None:
+    """Save skill kernels JSON or raw string to the gdsf file."""
+    try:
+        parsed = json.loads(kernels)
+    except Exception:
+        parsed = kernels
+    data = _load_data()
+    data["skill_kernels"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_skill_kernels():
+    data = _load_data()
+    raw = data.get("skill_kernels", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw

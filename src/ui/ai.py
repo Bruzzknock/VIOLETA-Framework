@@ -150,6 +150,28 @@ Our Atomic Unit: {atomic_unit}
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
 
+
+def step2_kernels(atomic_unit: str, atomic_skills) -> str:
+        """Generate kernel sentences for each atomic skill."""
+        system_prompt = """
+You are a helpful assistant for the VIOLETA framework.
+Given an atomic unit and its skills, create a one-sentence kernel for each
+skill. A kernel follows the pattern: Input -> Transformation -> Output and
+uses active verbs and plain language. Return the kernels as a JSON object
+mapping each skill to its kernel sentence.
+        """
+        model = ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
+
+        lc_messages = [SystemMessage(content=system_prompt)]
+        lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
+        lc_messages.append(HumanMessage(content=f"Skills: {atomic_skills}"))
+
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)
+
 def remove_think_block(text: str) -> str:
         return re.sub(r"<think>.*?</think>\s*","", text, flags=re.DOTALL)
 
