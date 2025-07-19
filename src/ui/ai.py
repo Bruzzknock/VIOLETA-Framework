@@ -92,6 +92,7 @@ def step3b(theme: str, skill_kernels) -> str:
 ### STEP 3B \u2013 KERNEL-BY-KERNEL MAPPING
 For each kernel from Step 2, specify an in-world element for the input, an action matching the kernel verb, and the resulting output. Mark the row with `Y` if the Input \u2192 Transformation \u2192 Output logic is preserved, otherwise `N`.
 The theme must cover every kernel. Revise the theme if any kernel cannot be mapped.
+
 Return the result as JSON.
 
 Examples:
