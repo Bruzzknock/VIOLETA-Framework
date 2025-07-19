@@ -141,3 +141,24 @@ def load_kernel_mappings():
         return json.loads(raw)
     except Exception:
         return raw
+
+
+# Functions for saving the kernel-theme mapping produced in Step 3B
+def save_kernel_theme_mapping(info: str) -> None:
+    """Save Step 3B table to the gdsf file."""
+    try:
+        parsed = json.loads(info)
+    except Exception:
+        parsed = info
+    data = _load_data()
+    data["kernel_theme_mapping"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_kernel_theme_mapping():
+    data = _load_data()
+    raw = data.get("kernel_theme_mapping", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
