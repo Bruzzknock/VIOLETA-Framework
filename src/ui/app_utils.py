@@ -119,3 +119,25 @@ def load_skill_kernels():
         return json.loads(raw)
     except Exception:
         return raw
+
+
+# Adding new kernel mapping functions
+
+def save_kernel_mappings(mappings: str) -> None:
+    """Save kernel mapping table to the gdsf file."""
+    try:
+        parsed = json.loads(mappings)
+    except Exception:
+        parsed = mappings
+    data = _load_data()
+    data["kernel_mappings"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_kernel_mappings():
+    data = _load_data()
+    raw = data.get("kernel_mappings", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw

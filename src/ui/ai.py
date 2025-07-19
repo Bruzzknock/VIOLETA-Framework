@@ -214,65 +214,16 @@ def remove_think_block(text: str) -> str:
 
 
 def step3(atomic_skills, messages: List[Dict[str, str]]) -> str:
-        """Return a chat-based response for choosing a theme."""
+        """Return a chat-based response for choosing a theme and validating kernels."""
         system_prompt = """
-Once the atomic unit and its component skills are defined, the next step is to
-select a theme—a narrative setting and emotional context in which the skills
-of the atomic unit are naturally relevant and continuously engaged.
-The designer does this by answering the question:
+### STEP 3 · COMMIT TO A THEME & VALIDATE EVERY KERNEL
 
-“In what kind of world or situation would someone need to use the skills
-from my atomic unit regularly?”
+**Step 3A – Pick a Candidate Theme**
+Answer the question: "In what kind of world or situation would someone need to use the skills from my atomic unit regularly?" Provide a two-sentence mood blurb describing the world's flavour, stakes and common activities.
 
-This formulation is designed to trigger System 1 intuition. Instead of forcing
-a rational, top-down selection of theme, the question gently activates the
-designer’s subconscious ability to associate real-life scenarios with the skills
-involved. It encourages creativity while keeping the design anchored in pedagogical
-relevance.
-While there are no restrictions on the type of theme—realistic, fictional,
-metaphorical, or fantastical—the key is that the theme provides a meaningful
-context for the atomic unit to manifest and develop. A good
-theme not only helps players emotionally invest in the game world, but also
-ensures that practicing the target skills feels logical and engaging within that
-context.
-
-Example:
-atomic unit: Foundational Personal Budgeting - The ability to build, execute, and iterate a month-to-month budget that keeps spending below income while funding short- and long-term goals.
-atomic skills: 
-1. Gather & organise facts	
-- Income recording = List all income streams and their cadence
-- Expense tracking = Capture every outflow as it happens
-- Categorisation = Sort expenses into fixed, variable, discretionary
-2. Build a workable plan	
-- Cash-flow snapshot = Calculate disposable income (= income – must-pay costs)
-- Goal setting (SMART) = Translate life goals into monthly saving targets
-Prioritisation & trade-off analysis = Decide what gets funded first when money is tight
-3. Execute & monitor	
-- Envelope / zero-based allocation = Assign every euro to a category before the month starts
-- Real-time variance monitoring = Compare actual vs. planned spend and flag overruns
-- Mid-cycle adjustment = Shift funds between categories without breaking the plan
-4. Sustain & improve	
-- Periodic review ritual = Run a weekly/monthly retro and roll lessons into next plan
-- Tool fluency = Use a tracker or spreadsheet efficiently (import data, automate rules)
-- Impulse-control tactics = Deploy cues (cool-down timers, wish-lists) to curb unplanned buys
-
-
-Choosen theme Theme:  Moon-Base Quartermaster
-Keep a fledgling lunar colony supplied until the next cargo shuttle arrives.
-
-Income recording : supply-pod manifests—each incoming cargo flight (helium-3 sales revenue, government stipends, private-sector grants) is logged as a new income line.
-Expense tracking : live consumption feeds from habitat modules (life-support power, hydroponic nutrients, 3-D-printer filament) stream into the ledger via IoT monitor beacons.
-Categorisation : tag every cost node as Fixed (comm-sat bandwidth lease), Variable (solar-panel dust-clearing, EVA-suit repairs) or Discretionary (crew-morale VR cinema nights).
-Cash-flow snapshot : the Colony Dashboard recomputes “Survival runway” (days of oxygen/food) and “Investment headroom” after costs are categorised.
-SMART goal setting : create goal cards such as “Expand hydro-farm capacity by 20 % within 60 sols” and link them to an “Expansion” funding envelope.
-Prioritisation & trade-off analysis : weigh diverting credits from science-lab upgrades to emergency water-filter replacements when resources tighten.
-Envelope / zero-based allocation : during pre-sol planning, drag every projected credit into envelopes (Life-Support, Infrastructure, R&D, Morale) so none remain unassigned.
-Real-time variance monitoring : meteorite damage spikes power costs; live budget vs plan deltas glow red on the Ledger HUD.
-Mid-cycle adjustment : reroute surplus helium-3 export revenue into the “Emergency Repairs” envelope when a rover tyre bursts mid-week.
-Periodic review ritual : convene a weekly Sol-End Council with department heads, paging through auto-generated KPI slides before approving next-week baselines.
-Tool fluency : use the colony’s “LunaBooks” app to bulk-import sensor CSVs, set up auto-rules (e.g., flag any category exceeding 120 % of plan).
-Impulse-control tactics : incoming crew requests (e.g., power-hungry holo-surf park) enter a 24-hour cooling rack; many expire or become cheaper off-peak, curbing impulse spending.
-
+**Step 3B – Kernel-by-Kernel Mapping**
+For each kernel from Step 2, specify an in-world element for the input, an action matching the kernel verb, and the resulting output. Mark the row with `Y` if the Input → Transformation → Output logic is preserved, otherwise `N`.
+The theme must cover every kernel. Revise the theme if any kernel cannot be mapped.
 
 Our Atomic Skills: {atomic_skills}
         """
@@ -289,6 +240,27 @@ Our Atomic Skills: {atomic_skills}
                         lc_messages.append(HumanMessage(content=msg["content"]))
                 else:
                         lc_messages.append(AIMessage(content=msg["content"]))
+
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)
+
+def step3_mapping(theme: str, skill_kernels) -> str:
+        """Generate a kernel mapping table for the chosen theme."""
+        system_prompt = """
+You are a helpful assistant for the VIOLETA framework.
+Given a theme and a collection of kernels (each with input, verb and output), create a mapping table.
+For every kernel, propose a theme-specific input, an action expressing the verb, and a theme-based output.
+Mark each row with `Y` if the Input → Transformation → Output structure is preserved, otherwise `N`.
+Return the result as JSON.
+        """
+        model = ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
+
+        lc_messages = [SystemMessage(content=system_prompt)]
+        lc_messages.append(HumanMessage(content=f"Theme: {theme}"))
+        lc_messages.append(HumanMessage(content=f"Kernels: {skill_kernels}"))
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
