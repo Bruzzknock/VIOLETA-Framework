@@ -57,7 +57,13 @@ atomic unit: Programming Syntax
 atomic skills: ["Data types", "Variables declaration and assignment", "Operators and their precedence", "Control flow (conditionals, loops)", "Functions definition and invocation", "Scope management", "Arrays and collections syntax", "Error handling", "String manipulation functions"]
 output:
 Fantasy Theme: Magic and Code
-In a realm where technology and magic intertwine, the world of Arcanecode is governed by the principles of programming and spellcasting. Wizards manipulate data types as elemental forces while variables channel magical energies. Control flow directs spells, and functions become reusable incantations. Careful scope management limits each enchantment, and error handling prevents catastrophic failures.
+In a realm where technology and magic intertwine, the world of Arcanecode is governed by the principles of programming and spellcasting. Wizards and sorcerers wielding arcane knowledge cast spells using intricate code syntax, 
+with data types representing different magical elements—fire, water, earth, and air. Variables declaration and assignment are essential for assigning magical energies or resources, while operators and precedence dictate the 
+order in which spells are combined. Control flow through conditionals and loops governs the decision-making processes of magic, such as casting protective shields until a specific condition is met. Functions definition and 
+invocation allow for reusable spells and magical constructs, while scope management limits the effect of spells to certain areas or durations. Error handling is crucial for addressing failed spells or unexpected magical reactions, 
+and string manipulation shapes and alters magical runes or incantations. In this world, the stakes are high—incorrect code can lead to disastrous consequences like spells backfiring or magical energy overflows. Being a skilled programmer 
+in Arcanecode is not just a talent; it is essential for survival and success in a realm where magic is powered by code.
+
 </example>
 
 Our Atomic Skills: {atomic_skills}
@@ -102,7 +108,28 @@ output:
       "verb": "transform into",
       "output": "categorized magic (e.g., fire, water)",
       "preserved": "Y"
-    }
+    },
+    {
+      "kernel": "Variables declaration and assignment",
+      "input": "magic energy source",
+      "verb": "bind into",
+      "output": "bound amulet or container",
+      "preserved": "Y"
+    },
+    {
+      "kernel": "Control flow (conditionals, loops)",
+      "input": "protective magic and conditions",
+      "verb": "cast based on",
+      "output": "active protective shield",
+      "preserved": "Y"
+    },
+    {
+      "kernel": "Functions definition and invocation (define function)",
+      "input": "spell parameters and task",
+      "verb": "define as",
+      "output": " reusable spell template",
+      "preserved": "Y"
+    },
   ]
 }
 </example>
