@@ -22,24 +22,24 @@ if submitted:
 
 st.subheader("Kernel Mapping Table")
 
-if "mapping_text" not in st.session_state:
-    loaded = app_utils.load_kernel_mappings()
+if "info_text" not in st.session_state:
+    loaded = app_utils.load_kernel_theme_mapping()
     if loaded:
-        st.session_state.mapping_text = json.dumps(loaded, indent=2)
+        st.session_state.info_text = json.dumps(loaded, indent=2)
     else:
-        st.session_state.mapping_text = ""
+        st.session_state.info_text = ""
 
-st.text_area("Kernel Mapping (JSON)", key="mapping_text", height=200)
+st.text_area("Step 3B Table (JSON)", key="info_text", height=200)
 
 def generate_mapping():
     with st.spinner("Generating mapping..."):
-        generated = ai.step3_mapping(theme_input, skill_kernels)
-    st.session_state.mapping_text = generated
+        generated = ai.step3b(theme_input, skill_kernels)
+    st.session_state.info_text = generated
 
 st.button("Generate Mapping", on_click=generate_mapping)
 
-if st.button("Save Mapping"):
-    app_utils.save_kernel_mappings(st.session_state.mapping_text)
+if st.button("Save Additional Info"):
+    app_utils.save_kernel_theme_mapping(st.session_state.info_text)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -51,7 +51,7 @@ prompt = st.chat_input("Generate Ideas")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.spinner("Generating answer..."):
-        answer = ai.step3(atomic_skills, st.session_state.messages)
+        answer = ai.step3(atomic_skills, skill_kernels, st.session_state.messages)
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)

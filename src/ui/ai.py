@@ -44,8 +44,52 @@ the designer’s educational goals, target audience, and contextual constraints.
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
 
-def remove_think_block(text: str) -> str:
-        return re.sub(r"<think>.*?</think>\s*","", text, flags=re.DOTALL)
+
+def step3a(atomic_skills, messages: List[Dict[str, str]]) -> str:
+        """Return a chat-based response for choosing a theme."""
+        system_prompt = """
+### STEP 3A \u2013 PICK A CANDIDATE THEME
+Answer the question: "In what kind of world or situation would someone need to use the skills from my atomic unit regularly?" Provide a two-sentence mood blurb describing the world's flavour, stakes and common activities.
+
+Our Atomic Skills: {atomic_skills}
+        """
+        model = ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
+
+        lc_messages = [SystemMessage(content=system_prompt)]
+
+        lc_messages.append(HumanMessage(content=f"My atomic skills are: {atomic_skills}"))
+        for msg in messages:
+                if msg["role"] == "user":
+                        lc_messages.append(HumanMessage(content=msg["content"]))
+                else:
+                        lc_messages.append(AIMessage(content=msg["content"]))
+
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)
+
+
+def step3b(theme: str, skill_kernels) -> str:
+        """Generate a kernel mapping table for the chosen theme."""
+        system_prompt = """
+### STEP 3B \u2013 KERNEL-BY-KERNEL MAPPING
+For each kernel from Step 2, specify an in-world element for the input, an action matching the kernel verb, and the resulting output. Mark the row with `Y` if the Input \u2192 Transformation \u2192 Output logic is preserved, otherwise `N`.
+The theme must cover every kernel. Revise the theme if any kernel cannot be mapped.
+Return the result as JSON.
+        """
+        model = ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
+
+        lc_messages = [SystemMessage(content=system_prompt)]
+        lc_messages.append(HumanMessage(content=f"Theme: {theme}"))
+        lc_messages.append(HumanMessage(content=f"Kernels: {skill_kernels}"))
+
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)
 
 
 def step2(atomic_unit, messages: List[Dict[str, str]]) -> str:
@@ -213,54 +257,12 @@ def remove_think_block(text: str) -> str:
         return re.sub(r"<think>.*?</think>\s*","", text, flags=re.DOTALL)
 
 
-def step3(atomic_skills, messages: List[Dict[str, str]]) -> str:
-        """Return a chat-based response for choosing a theme and validating kernels."""
-        system_prompt = """
-### STEP 3 · COMMIT TO A THEME & VALIDATE EVERY KERNEL
-
-**Step 3A – Pick a Candidate Theme**
-Answer the question: "In what kind of world or situation would someone need to use the skills from my atomic unit regularly?" Provide a two-sentence mood blurb describing the world's flavour, stakes and common activities.
-
-**Step 3B – Kernel-by-Kernel Mapping**
-For each kernel from Step 2, specify an in-world element for the input, an action matching the kernel verb, and the resulting output. Mark the row with `Y` if the Input → Transformation → Output logic is preserved, otherwise `N`.
-The theme must cover every kernel. Revise the theme if any kernel cannot be mapped.
-
-Our Atomic Skills: {atomic_skills}
-        """
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
-
-        lc_messages = [SystemMessage(content=system_prompt)]
-
-        lc_messages.append(HumanMessage(content=f"My atomic skills are: {atomic_skills}"))
-        for msg in messages:
-                if msg["role"] == "user":
-                        lc_messages.append(HumanMessage(content=msg["content"]))
-                else:
-                        lc_messages.append(AIMessage(content=msg["content"]))
-
-        response = model.invoke(lc_messages)
-        return remove_think_block(response.content)
+def step3(atomic_skills, skill_kernels, messages: List[Dict[str, str]]) -> str:
+        """Return a chat-based response using Step 3A then Step 3B."""
+        theme = step3a(atomic_skills, messages)
+        mapping = step3b(theme, skill_kernels)
+        return f"{theme}\n\n{mapping}"
 
 def step3_mapping(theme: str, skill_kernels) -> str:
-        """Generate a kernel mapping table for the chosen theme."""
-        system_prompt = """
-You are a helpful assistant for the VIOLETA framework.
-Given a theme and a collection of kernels (each with input, verb and output), create a mapping table.
-For every kernel, propose a theme-specific input, an action expressing the verb, and a theme-based output.
-Mark each row with `Y` if the Input → Transformation → Output structure is preserved, otherwise `N`.
-Return the result as JSON.
-        """
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
-
-        lc_messages = [SystemMessage(content=system_prompt)]
-        lc_messages.append(HumanMessage(content=f"Theme: {theme}"))
-        lc_messages.append(HumanMessage(content=f"Kernels: {skill_kernels}"))
-
-        response = model.invoke(lc_messages)
-        return remove_think_block(response.content)
+        """Backward compatible wrapper for step3b."""
+        return step3b(theme, skill_kernels)
