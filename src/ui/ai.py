@@ -281,8 +281,8 @@ def step3(atomic_skills, skill_kernels, messages: List[Dict[str, str]]) -> str:
         mapping = step3_mapping(theme, skill_kernels)
         return f"{theme}\n\n{mapping}"
 
-def step3_mapping(theme: str, skill_kernels) -> str:
-        """Generate mappings for all kernels."""
+def step3_mapping(theme: str, skill_kernels):
+        """Generate mappings for all kernels and return them as JSON."""
         results = []
         for skill, kernels in skill_kernels.items():
                 for kernel in kernels:
@@ -291,9 +291,7 @@ def step3_mapping(theme: str, skill_kernels) -> str:
                                 mapped = json.loads(mapping)
                         except Exception:
                                 mapped = mapping
-                        results.append({
-                                "skill": skill,
-                                "skill_kernel": kernel,
-                                "in_world_kernel": mapped,
-                        })
-        return json.dumps(results, indent=2)
+                        if isinstance(mapped, dict):
+                                mapped["kernel"] = skill
+                        results.append(mapped)
+        return json.dumps({"kernels": results}, indent=2)
