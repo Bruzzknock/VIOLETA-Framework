@@ -45,7 +45,6 @@ the designer’s educational goals, target audience, and contextual constraints.
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
 
-
 def step3a(atomic_skills, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing a theme."""
         system_prompt = """
@@ -82,11 +81,8 @@ Our Atomic Skills: {atomic_skills}
                         lc_messages.append(HumanMessage(content=msg["content"]))
                 else:
                         lc_messages.append(AIMessage(content=msg["content"]))
-
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
-
-
 def step3b(theme: str, skill_kernel) -> str:
         """Map a single skill kernel into the chosen theme."""
         system_prompt = """
@@ -107,7 +103,8 @@ Return only JSON with keys: input, verb, output, preserved.
         lc_messages.append(HumanMessage(content=f"Kernel: {skill_kernel}"))
 
         response = model.invoke(lc_messages)
-        return remove_think_block(response.content)
+        cleaned = remove_think_block(response.content)
+        return strip_json_code_block(cleaned)
 
 
 def step2(atomic_unit, messages: List[Dict[str, str]]) -> str:
@@ -273,6 +270,19 @@ atomic skill: Modulo Division Hashing
 
 def remove_think_block(text: str) -> str:
         return re.sub(r"<think>.*?</think>\s*","", text, flags=re.DOTALL)
+
+
+def strip_json_code_block(text: str) -> str:
+        """Remove Markdown code fences and leading language hints."""
+        text = text.strip()
+        # Remove ```json ... ``` fences
+        if text.startswith("```"):
+                text = re.sub(r"^```[a-zA-Z]*\n", "", text)
+                text = re.sub(r"\n```$", "", text)
+        # Remove a plain "json" prefix if present
+        if text.lower().startswith("json\n"):
+                text = text.split("\n", 1)[1]
+        return text.strip()
 
 
 def step3(atomic_skills, skill_kernels, messages: List[Dict[str, str]]) -> str:
