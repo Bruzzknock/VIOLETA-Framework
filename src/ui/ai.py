@@ -266,6 +266,3 @@ def step3(atomic_skills, skill_kernels, messages: List[Dict[str, str]]) -> str:
 def step3_mapping(theme: str, skill_kernels) -> str:
         """Backward compatible wrapper for step3b."""
         return step3b(theme, skill_kernels)
-
-def remove_think_block(text: str) -> str:
-        return re.sub(r"<think>.*?</think>\s*","", text, flags=re.DOTALL)
