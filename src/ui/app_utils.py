@@ -90,15 +90,44 @@ def load_atomic_skills():
         return raw
 
 
+def _split_theme(theme: str):
+    """Split a theme string into name and description."""
+    lines = [l.strip() for l in theme.splitlines() if l.strip()]
+    if not lines:
+        return "", ""
+    name = lines[0]
+    desc = "\n".join(lines[1:]).strip()
+    return name, desc
+
+
 def save_theme(theme: str) -> None:
+    """Save theme text as separate name and description fields."""
+    name, desc = _split_theme(theme)
     data = _load_data()
-    data["theme"] = {"value": theme}
+    data["theme"] = {"name": name, "description": desc}
     _save_data(data)
 
 
 def load_theme() -> str:
+    """Load theme as a single text blob for display."""
     data = _load_data()
-    return data.get("theme", {}).get("value", "")
+    theme = data.get("theme", {})
+    if "name" in theme:
+        text = theme.get("name", "")
+        if theme.get("description"):
+            text += "\n" + theme["description"]
+        return text
+    return theme.get("value", "")
+
+
+def load_theme_dict() -> dict:
+    """Return theme as a dictionary with name and description."""
+    data = _load_data()
+    theme = data.get("theme", {})
+    if "name" in theme:
+        return theme
+    name, desc = _split_theme(theme.get("value", ""))
+    return {"name": name, "description": desc}
 
 
 def save_skill_kernels(kernels: str) -> None:
@@ -144,11 +173,14 @@ def load_kernel_mappings():
 
 
 # Functions for saving the kernel-theme mapping produced in Step 3B
-def save_kernel_theme_mapping(info: str) -> None:
+def save_kernel_theme_mapping(info) -> None:
     """Save Step 3B table to the gdsf file."""
-    try:
-        parsed = json.loads(info)
-    except Exception:
+    if isinstance(info, str):
+        try:
+            parsed = json.loads(info)
+        except Exception:
+            parsed = info
+    else:
         parsed = info
     data = _load_data()
     data["kernel_theme_mapping"] = {"value": json.dumps(parsed)}
