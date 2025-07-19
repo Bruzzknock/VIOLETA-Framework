@@ -1,5 +1,6 @@
 import re
 import os
+import json
 from typing import List, Dict
 
 from dotenv import load_dotenv
@@ -86,32 +87,15 @@ Our Atomic Skills: {atomic_skills}
         return remove_think_block(response.content)
 
 
-def step3b(theme: str, skill_kernels) -> str:
-        """Generate a kernel mapping table for the chosen theme."""
+def step3b(theme: str, skill_kernel) -> str:
+        """Map a single skill kernel into the chosen theme."""
         system_prompt = """
-### STEP 3B \u2013 KERNEL-BY-KERNEL MAPPING
-For each kernel from Step 2, specify an in-world element for the input, an action matching the kernel verb, and the resulting in-world output. Mark the row with `Y` if the Input \u2192 Transformation \u2192 Output logic is preserved, otherwise `N`.
-You are looking for structural isomorphism between the theme and kernels.
-The theme must cover every kernel. Revise the theme if any kernel cannot be mapped.
-Return the result as JSON.
-
-Examples:
-<example>
-theme: Fantasy Theme: Magic and Code
-kernels: {"Data types": [{"kernel": "Transform data without context into structured information using predefined categories.", "input": "data without context", "verb": "transform into", "output": "structured information with data types"}]}
-output:
-{
-  "theme": "Fantasy Theme: Magic and Code",
-  "kernels": [
-    {
-      "kernel": "Data types",
-      "input": "raw magical energy",
-      "verb": "transform into",
-      "output": "categorized magic (e.g., fire, water)",
-      "preserved": "Y"
-    }
-}
-</example>
+### STEP 3B – KERNEL-BY-KERNEL MAPPING
+You will receive one skill kernel consisting of an input, verb and output.
+Within the given theme find an in-world Input → Transformation → Output that is
+structurally isomorphic to the kernel. Focus on matching the input and output as
+closely as possible. Mark with `Y` if the logic is preserved, otherwise `N`.
+Return only JSON with keys: input, verb, output, preserved.
         """
         model = ChatOllama(
                 model="deepseek-r1:14b",
@@ -120,7 +104,7 @@ output:
 
         lc_messages = [SystemMessage(content=system_prompt)]
         lc_messages.append(HumanMessage(content=f"Theme: {theme}"))
-        lc_messages.append(HumanMessage(content=f"Kernels: {skill_kernels}"))
+        lc_messages.append(HumanMessage(content=f"Kernel: {skill_kernel}"))
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
@@ -292,11 +276,22 @@ def remove_think_block(text: str) -> str:
 
 
 def step3(atomic_skills, skill_kernels, messages: List[Dict[str, str]]) -> str:
-        """Return a chat-based response using Step 3A then Step 3B."""
+        """Return a chat-based response using Step 3A then Step 3B for each kernel."""
         theme = step3a(atomic_skills, messages)
-        mapping = step3b(theme, skill_kernels)
+        mapping = step3_mapping(theme, skill_kernels)
         return f"{theme}\n\n{mapping}"
 
-def step3_mapping(theme: str, skill_kernels) -> str:
-        """Backward compatible wrapper for step3b."""
-        return step3b(theme, skill_kernels)
+def step3_mapping(theme: str, skill_kernels):
+        """Generate mappings for all kernels and return them as JSON."""
+        results = []
+        for skill, kernels in skill_kernels.items():
+                for kernel in kernels:
+                        mapping = step3b(theme, kernel)
+                        try:
+                                mapped = json.loads(mapping)
+                        except Exception:
+                                mapped = mapping
+                        if isinstance(mapped, dict):
+                                mapped["kernel"] = skill
+                        results.append(mapped)
+        return json.dumps({"kernels": results}, indent=2)
