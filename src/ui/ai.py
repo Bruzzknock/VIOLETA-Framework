@@ -51,6 +51,15 @@ def step3a(atomic_skills, messages: List[Dict[str, str]]) -> str:
 ### STEP 3A \u2013 PICK A CANDIDATE THEME
 Answer the question: "In what kind of world or situation would someone need to use the skills from my atomic unit regularly?" Provide a two-sentence mood blurb describing the world's flavour, stakes and common activities.
 
+Examples:
+<example>
+atomic unit: Programming Syntax
+atomic skills: ["Data types", "Variables declaration and assignment", "Operators and their precedence", "Control flow (conditionals, loops)", "Functions definition and invocation", "Scope management", "Arrays and collections syntax", "Error handling", "String manipulation functions"]
+output:
+Fantasy Theme: Magic and Code
+In a realm where technology and magic intertwine, the world of Arcanecode is governed by the principles of programming and spellcasting. Wizards manipulate data types as elemental forces while variables channel magical energies. Control flow directs spells, and functions become reusable incantations. Careful scope management limits each enchantment, and error handling prevents catastrophic failures.
+</example>
+
 Our Atomic Skills: {atomic_skills}
         """
         model = ChatOllama(
@@ -78,6 +87,25 @@ def step3b(theme: str, skill_kernels) -> str:
 For each kernel from Step 2, specify an in-world element for the input, an action matching the kernel verb, and the resulting output. Mark the row with `Y` if the Input \u2192 Transformation \u2192 Output logic is preserved, otherwise `N`.
 The theme must cover every kernel. Revise the theme if any kernel cannot be mapped.
 Return the result as JSON.
+
+Examples:
+<example>
+theme: Fantasy Theme: Magic and Code
+kernels: {"Data types": [{"kernel": "Transform data without context into structured information using predefined categories.", "input": "data without context", "verb": "transform into", "output": "structured information with data types"}], "Variables declaration and assignment": [{"kernel": "Create or update variable storage to hold specific values or references.", "input": "variable and value/reference", "verb": "create/update", "output": "variable storage with assigned value/reference"}]}
+output:
+{
+  "theme": "Fantasy Theme: Magic and Code",
+  "kernels": [
+    {
+      "kernel": "Data types",
+      "input": "raw magical energy",
+      "verb": "transform into",
+      "output": "categorized magic (e.g., fire, water)",
+      "preserved": "Y"
+    }
+  ]
+}
+</example>
         """
         model = ChatOllama(
                 model="deepseek-r1:14b",
