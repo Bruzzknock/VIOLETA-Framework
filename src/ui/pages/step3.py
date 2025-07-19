@@ -33,13 +33,16 @@ st.text_area("Step 3B Table (JSON)", key="info_text", height=200)
 
 def generate_mapping():
     with st.spinner("Generating mapping..."):
-        generated = ai.step3_mapping(theme_input, skill_kernels)
+        generated, kernel_map = ai.step3_mapping(theme_input, skill_kernels)
     st.session_state.info_text = generated
+    st.session_state.kernel_map = kernel_map
 
 st.button("Generate Mapping", on_click=generate_mapping)
 
 if st.button("Save Additional Info"):
     app_utils.save_kernel_theme_mapping(st.session_state.info_text)
+    if "kernel_map" in st.session_state:
+        app_utils.save_kernel_mappings(st.session_state.kernel_map)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []

@@ -131,11 +131,23 @@ def load_theme_dict() -> dict:
 
 
 def save_skill_kernels(kernels: str) -> None:
-    """Save skill kernels JSON or raw string to the gdsf file."""
+    """Save skill kernels JSON or raw string to the gdsf file.
+
+    Each kernel is assigned a unique ``id`` so it can be referenced later.
+    """
     try:
         parsed = json.loads(kernels)
     except Exception:
         parsed = kernels
+    if isinstance(parsed, dict):
+        idx = 0
+        for skill, kerns in parsed.items():
+            if not isinstance(kerns, list):
+                continue
+            for k in kerns:
+                if isinstance(k, dict) and "id" not in k:
+                    k["id"] = f"k{idx}"
+                    idx += 1
     data = _load_data()
     data["skill_kernels"] = {"value": json.dumps(parsed)}
     _save_data(data)
@@ -147,16 +159,22 @@ def load_skill_kernels():
     try:
         return json.loads(raw)
     except Exception:
-        return raw
+        try:
+            return json.loads(raw[1:-1])
+        except Exception:
+            return raw
 
 
 # Adding new kernel mapping functions
 
-def save_kernel_mappings(mappings: str) -> None:
+def save_kernel_mappings(mappings) -> None:
     """Save kernel mapping table to the gdsf file."""
-    try:
-        parsed = json.loads(mappings)
-    except Exception:
+    if isinstance(mappings, str):
+        try:
+            parsed = json.loads(mappings)
+        except Exception:
+            parsed = mappings
+    else:
         parsed = mappings
     data = _load_data()
     data["kernel_mappings"] = {"value": json.dumps(parsed)}

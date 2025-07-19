@@ -278,14 +278,23 @@ def remove_think_block(text: str) -> str:
 def step3(atomic_skills, skill_kernels, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response using Step 3A then Step 3B for each kernel."""
         theme = step3a(atomic_skills, messages)
-        mapping = step3_mapping(theme, skill_kernels)
+        mapping, _ = step3_mapping(theme, skill_kernels)
         return f"{theme}\n\n{mapping}"
 
-def step3_mapping(theme: str, skill_kernels) -> str:
-        """Generate mappings for all kernels."""
+def step3_mapping(theme: str, skill_kernels):
+        """Generate mappings for all kernels.
+
+        Returns a tuple of (mapping_json, kernel_map) where `mapping_json` is a
+        JSON string describing the in-world kernels and `kernel_map` maps an id
+        to the original skill kernel.
+        """
         results = []
+        kernel_map = {}
+        idx = 0
         for skill, kernels in skill_kernels.items():
                 for kernel in kernels:
+                        kernel_id = kernel.get("id", f"k{idx}")
+                        idx += 1
                         mapping = step3b(theme, kernel)
                         try:
                                 mapped = json.loads(mapping)
@@ -293,7 +302,8 @@ def step3_mapping(theme: str, skill_kernels) -> str:
                                 mapped = mapping
                         results.append({
                                 "skill": skill,
-                                "skill_kernel": kernel,
+                                "kernel_id": kernel_id,
                                 "in_world_kernel": mapped,
                         })
-        return json.dumps(results, indent=2)
+                        kernel_map[kernel_id] = {"skill": skill, "skill_kernel": kernel}
+        return json.dumps(results, indent=2), kernel_map
