@@ -51,87 +51,57 @@ def remove_think_block(text: str) -> str:
 def step2(atomic_unit, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing atomic skills."""
         system_prompt = """
-An atomic unit, as defined in the framework, refers to a bundled set of
-real-world knowledge, behaviors, or skills that should be learned together as
-a cohesive whole. It is the educational “nucleus” of the game—what the game
-aims to teach or train, not as isolated trivia, but as a functional, applicable
-cluster of competencies.
-Atomic units can vary greatly in complexity. They may be as narrow
-as a single soft skill—such as assertive communication or basic mental
-arithmetic—or as broad as an entire interdisciplinary domain, such as
-systems thinking or quantum physics. The choice of atomic unit depends on
-the designer’s educational goals, target audience, and contextual constraints. 
+### STEP 2 · IDENTIFY THE ATOMIC SKILLS
 
-Theory about what Atomic Skills are:
-        
-Once the atomic unit has been defined, the next step is to dissect it into its
-component parts by asking:
+**Context**
+An *atomic unit* is a bundled set of real-world knowledge, behaviours, or skills that should be learned together as a cohesive whole. It is the educational “nucleus” of the game—what the game aims to teach or train, not as isolated trivia but as a functional, applicable cluster of competencies.  
+Atomic units can range from a narrow soft skill (e.g. assertive communication) to an entire interdisciplinary domain (e.g. systems thinking). The choice depends on educational goals, target audience, and design constraints.
 
-“What knowledge, actions, and/or skills are necessary to master this
-atomic unit?”
+**Task for the AI**
+Break the atomic unit into the smallest set of **atomic skills** that must be mastered to achieve functional competence.
 
-This dissection serves multiple purposes. First, it provides granular control
-in later stages of the design process, particularly during theme and mechanics
-integration. Second, and more subtly, it ensures internal cohesion: by
-identifying sub-skills that all contribute to a common overarching goal, the
-designer avoids the risk of mixing unrelated competencies simply for the sake
-of variety.
+**When to STOP decomposing**
+* If the atomic unit/skill is already a single, self-contained skill or behaviour (e.g. *Encryption*), return **that one skill only**.
+* Otherwise, list each atomic skill separately.  
+  *Categories are optional*—use them only when they add clarity.
+
+**Coherence check**
+Every atomic skill must directly support the atomic unit’s overarching goal; drop anything tangential.
+
+**Required output format**
+atomic unit: <name>
+atomic skills:
+– <skill 1>
+– <skill 2>
+…
 
 Examples:
-
 <example>
 atomic unit: Foundational Personal Budgeting - The ability to build, execute, and iterate a month-to-month budget that keeps spending below income while funding short- and long-term goals.
-atomic skills: 
-1. Gather & organise facts	
-- Income recording = List all income streams and their cadence
-- Expense tracking = Capture every outflow as it happens
-- Categorisation = Sort expenses into fixed, variable, discretionary
-2. Build a workable plan	
-- Cash-flow snapshot = Calculate disposable income (= income – must-pay costs)
-- Goal setting (SMART) = Translate life goals into monthly saving targets
-Prioritisation & trade-off analysis = Decide what gets funded first when money is tight
-3. Execute & monitor	
-- Envelope / zero-based allocation = Assign every euro to a category before the month starts
-- Real-time variance monitoring = Compare actual vs. planned spend and flag overruns
-- Mid-cycle adjustment = Shift funds between categories without breaking the plan
-4. Sustain & improve	
-- Periodic review ritual = Run a weekly/monthly retro and roll lessons into next plan
-- Tool fluency = Use a tracker or spreadsheet efficiently (import data, automate rules)
-- Impulse-control tactics = Deploy cues (cool-down timers, wish-lists) to curb unplanned buys
+atomic skills:
+- Income recording
+- Expense tracking
+- Categorisation
+- Cash-flow snapshot
+- SMART goal setting
+- Prioritisation & trade-off analysis
+- Envelope / zero-based allocation
+- Real-time variance monitoring
+- Mid-cycle adjustment
 </example>
 
 <example>
-atomic unit: Core SQL Data Querying - Write and refine SELECT statements that retrieve, filter, join, and aggregate data from a relational database in order to answer real-world questions accurately and efficiently.
-atomic skills: 
-1. Read the landscape	
-- Schema inspection (DESCRIBE / .schema = Identify table columns, types, PK/FK relationships in a pop-up console
-- Entity-relationship mapping = Sketch or select correct table links before querying
-2. Pinpoint the data	
-- Basic SELECT = Pull specific columns from one table
-- Row filtering (WHERE with =, <>, <, >, BETWEEN, LIKE) = Return only rows that meet briefing criteria
-3. Shape the result	
-- Ordering & limiting (ORDER BY, LIMIT/OFFSET) = Deliver a sorted leaderboard or top-N report
-- Aliasing & computed columns = Rename columns, create simple expressions (e.g., price × qty as revenue)
-4. Combine datasets	
-- INNER JOIN = Merge two tables on FK–PK and produce correct composite rows
-- LEFT JOIN / UNION = Preserve unmatched rows or append compatible result sets
-5. Summarise & compare	
-- Aggregate functions (COUNT, SUM, AVG, MIN, MAX) = Produce totals or averages requested by mission control
-- GROUP BY + HAVING = Bucket data and filter groups (e.g., “cities with > 10 orders”)
-6. Safeguard & optimise (Tier-3 stretch)	
-- Parameterized queries = Demonstrate injection-safe syntax inside a simulated IDE
-- Index-aware filtering = Choose the faster predicate when time budget is tight
+atomic unit: Cryptography
+atomic skills:
+- Encryption
+- Decryption
+- Hashing Algorithm, modulo division method
 </example>
 
+**Note**
+These examples illustrate *one* valid decomposition. Adapt the granularity and wording to suit your pedagogical intent and audience context. Internal coherence and direct relevance to the atomic unit matter most.
 
-Note: This list is not exhaustive, nor is it intended to be universally applicable.
-It reflects one interpretation—my own—of the competencies involved in
-effective time management. Educators and designers are encouraged to adapt
-this step to fit their own pedagogical intent and audience context. What matters
-most is that the selected skill set is internally coherent and directly
-relevant to the atomic unit.
-
-Our Atomic Unit: {atomic_unit}
+Our atomic unit: {atomic_unit}
         """
         model = ChatOllama(
                 model="deepseek-r1:14b",
@@ -155,10 +125,77 @@ def step2_kernels(atomic_unit: str, atomic_skills) -> str:
         """Generate kernel sentences for each atomic skill."""
         system_prompt = """
 You are a helpful assistant for the VIOLETA framework.
-Given an atomic unit and its skills, create a one-sentence kernel for each
+Given an atomic skills, create a one-sentence kernel for each
 skill. A kernel follows the pattern: Input -> Transformation -> Output and
-uses active verbs and plain language. Return the kernels as a JSON object
-mapping each skill to its kernel sentence.
+uses active verbs and plain language. Use one active verb only per sentence.
+If a skill needs more than one verb, split it into multiple kernels.
+Return the kernels as a JSON object mapping each skill to its kernel sentence.
+
+Examples:
+<example>
+atomic unit: Cryptography
+atomic skill: Encryption
+output:
+{{
+  "Encryption": [
+    {{
+      "kernel":"Transform readable data into unreadable data with a reversible rule.",
+      "input": "readable data",
+      "verb": "transform into",
+      "output": "unreadable data with a reversible rule"
+    }}
+  ]
+}}
+</example>
+
+<example>
+atomic unit: Cryptography
+atomic skill: Hashing
+output:
+{{
+  "Hashing": [
+    {{
+      "kernel": "Condense variable-length data into a fixed-length fingerprint.",
+      "input": "variable-length data",
+      "verb": "condense into",
+      "output": "fixed-length fingerprint"
+    }}
+  ]
+}}
+</example>
+
+<example>
+atomic unit: Cryptography
+atomic skill: Modulo Division Hashing
+{{
+  "Modulo Division Hashing": [
+    {{
+      "kernel": "Divide the key by the table size to obtain its remainder index.",
+      "input": "key and table size",
+      "verb": "divide by",
+      "output": "remainder index"
+    }},
+    {{
+      "kernel": "Add the modulus to a negative key to obtain a positive remainder.",
+      "input": "negative key and modulus",
+      "verb": "add to",
+      "output": "positive remainder"
+    }},
+    {{
+      "kernel": "Link colliding keys into a chain to keep every entry reachable.",
+      "input": "colliding keys at same index",
+      "verb": "link into",
+      "output": "chain with reachable entries"
+    }},
+    {{
+      "kernel": "Divide the number of stored entries by the table size to calculate the load factor.",
+      "input": "number of entries and table size",
+      "verb": "divide by",
+      "output": "load factor"
+    }}
+  ]
+}}
+</example>
         """
         model = ChatOllama(
                 model="deepseek-r1:14b",
