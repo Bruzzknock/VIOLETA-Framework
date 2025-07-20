@@ -191,3 +191,27 @@ def load_emotional_arc():
         return json.loads(raw)
     except Exception:
         return {}
+
+
+# ---------------------------------------------------------------------------
+# Step 5: Layer Feelings helpers
+
+def save_layered_feelings(structure: str) -> None:
+    """Save the optional Layer Feelings structure."""
+    try:
+        parsed = json.loads(structure)
+    except Exception:
+        parsed = structure
+
+    data = _load_data()
+    data["layered_feelings"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_layered_feelings():
+    data = _load_data()
+    raw = data.get("layered_feelings", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw

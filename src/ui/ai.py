@@ -45,6 +45,10 @@ the designer’s educational goals, target audience, and contextual constraints.
         return remove_think_block(response.content)
 
 
+
+
+
+
 def step3a(atomic_skills, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing a theme."""
         system_prompt = """
@@ -332,6 +336,33 @@ Theme: {theme}
 Atomic skills: {atomic_skills}
 
 Write a 2–3 sentence vignette showing how a player would feel while applying these skills in this world. Then list the 3–5 key feelings in order, each with a brief explanation of which skill triggers it. Keep the answer concise.
+        """
+
+        model = ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
+
+        lc_messages = [SystemMessage(content=system_prompt)]
+        for msg in messages:
+                if msg["role"] == "user":
+                        lc_messages.append(HumanMessage(content=msg["content"]))
+                else:
+                        lc_messages.append(AIMessage(content=msg["content"]))
+
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)
+
+
+def step5(feelings: str, messages: List[Dict[str, str]]) -> str:
+        """Arrange feelings into a simple hierarchy or sequence."""
+
+        system_prompt = f"""
+### STEP 5 – Layer Feelings
+Feelings list: {feelings}
+
+Suggest a short hierarchy or sequence showing how these feelings relate.
+Use nested bullets or arrows. Keep it concise.
         """
 
         model = ChatOllama(
