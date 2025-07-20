@@ -336,6 +336,18 @@ Theme: {theme}
 Atomic skills: {atomic_skills}
 
 Write a 2–3 sentence vignette showing how a player would feel while applying these skills in this world. Then list the 3–5 key feelings in order, each with a brief explanation of which skill triggers it. Keep the answer concise.
+
+<example output>
+Vignette:
+The player is introduced to the Modulo Division Hashing Algorithm, feeling curious about its potential. As they study it, determination grows to understand its mechanics. Grasping the modulo operation's role empowers them, 
+leading to successful implementation in a project that brings satisfaction. Finally, overcoming a tough challenge with this skill leaves them feeling accomplished and confident in their abilities.
+Key feelings:
+Curiosity: The player first encounters the Modulo Division Hashing Algorithm and feels intrigued by its potential efficiency in data management. This curiosity drives them to explore further.
+Determination: As they delve into understanding how modulo operations distribute data, they face challenges but remain determined to master this technique.
+Empowerment: Once they grasp the concept of using modulo for hashing, they feel a surge of confidence and intelligence, knowing they've unlocked an efficient data management tool.
+Satisfaction: Successfully implementing the algorithm in a project brings them joy as they see improvements in data retrieval speed and efficiency.
+Accomplishment: Overcoming a complex problem using this skill fills them with pride, solidifying their understanding and mastery of Modulo Division Hashing.
+</example output>
         """
 
         model = ChatOllama(
@@ -399,7 +411,7 @@ If you kept an alternative, list it under **Back-ups**.
 ```text
 Layer Feelings Map
 - Parent Emotion
-  - Child Emotion
+-- Child Emotion
 - Parallel Emotion
 
 Rationale
@@ -411,7 +423,7 @@ Back-ups (optional)
 🔹 Example (Time-Management Prototype)
 Layer Feelings Map
 - Progress
-  - Gradual Control of Life
+-- Gradual Control of Life
 - Constant Pressure
 
 Rationale
