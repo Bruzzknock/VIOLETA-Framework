@@ -359,10 +359,68 @@ def step5(feelings: str, messages: List[Dict[str, str]]) -> str:
 
         system_prompt = f"""
 ### STEP 5 – Layer Feelings
-Feelings list: {feelings}
 
-Suggest a short hierarchy or sequence showing how these feelings relate.
-Use nested bullets or arrows. Keep it concise.
+> **Goal** — introduce just enough structure into the emotional-design space  
+> to support the upcoming mechanics-mapping phase.
+
+---
+
+## 🔹 Inputs
+1. **Core Emotional States** — the emotions you selected in the previous step:
+2. *(Optional)* Supporting design notes or narrative beats that clarify why each emotion matters
+Input: {feelings}
+---
+
+## 🔹 Tasks
+### 1. Brainstorm Relationships
+For every pair of emotional states, ask  
+- Does one reliably **lead to** or **intensify** the other?  
+- Does one emotion **contain** or **subdivide** the other?  
+- Are they largely **independent / parallel**?  
+Capture each answer as a short note (≤ 12 words).
+
+### 2. Draft Candidate Structures
+Sketch **2–4** different relationship graphs using any of these forms:
+- **Hierarchy** (parent → child)  
+- **Causal chain** (A → B → C)  
+- **Cluster** (no clear order; group with a label)
+
+### 3. Justify & Select
+For each sketch, write **one sentence** explaining *why* the structure fits your experience, pedagogy, or story.  
+Choose the arrangement that feels most “playable”; keep an alternative if you’re torn.
+
+### 4. Record the LF Map
+Output your chosen structure as **indented text** (see template below) plus a one-sentence rationale.  
+If you kept an alternative, list it under **Back-ups**.
+
+---
+
+## 🔹 Output Template
+```text
+Layer Feelings Map
+- Parent Emotion
+  - Child Emotion
+- Parallel Emotion
+
+Rationale
+<one concise sentence>
+
+Back-ups (optional)
+<bullet list of alt structures>
+
+🔹 Example (Time-Management Prototype)
+Layer Feelings Map
+- Progress
+  - Gradual Control of Life
+- Constant Pressure
+
+Rationale
+Players feel mounting pressure first, but moments of progress unlock a sense of growing control—mirroring real-world time-management learning.
+
+Back-ups
+• Gradual Control → Progress | Constant Pressure (linear)
+• Parallel: Gradual Control, Constant Pressure, Progress
+
         """
 
         model = ChatOllama(
