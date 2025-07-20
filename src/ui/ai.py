@@ -322,3 +322,29 @@ def step3(atomic_skills, skill_kernels, messages: List[Dict[str, str]]) -> str:
 def step3_mapping(theme: str, skill_kernels) -> str:
         """Backward compatible wrapper for step3b."""
         return step3b(theme, skill_kernels)
+
+
+def step4(theme: str, atomic_skills, messages: List[Dict[str, str]]) -> str:
+        """Generate a short emotional arc description."""
+        system_prompt = f"""
+### STEP 4 – Map the Emotional Arc
+Theme: {theme}
+Atomic skills: {atomic_skills}
+
+Write a 2–3 sentence vignette showing how a player would feel while applying these skills in this world. Then list the 3–5 key feelings in order, each with a brief explanation of which skill triggers it. Keep the answer concise.
+        """
+
+        model = ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
+
+        lc_messages = [SystemMessage(content=system_prompt)]
+        for msg in messages:
+                if msg["role"] == "user":
+                        lc_messages.append(HumanMessage(content=msg["content"]))
+                else:
+                        lc_messages.append(AIMessage(content=msg["content"]))
+
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)
