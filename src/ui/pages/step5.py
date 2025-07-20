@@ -6,6 +6,8 @@ st.header("Step 5 - Layer Feelings (LF) Process")
 
 emotional_arc = app_utils.load_emotional_arc()
 feelings = emotional_arc.get("feelings", "") if emotional_arc else ""
+if isinstance(feelings, (dict, list)):
+    feelings = app_utils.feelings_to_text(feelings)
 
 layer_default = app_utils.load_layered_feelings()
 
@@ -34,4 +36,3 @@ if prompt:
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)
-

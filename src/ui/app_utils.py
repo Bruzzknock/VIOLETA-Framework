@@ -21,7 +21,7 @@ def _save_data(sections: dict) -> None:
         for name, values in sections.items():
             f.write(f"[{name}]\n")
             for k, v in values.items():
-                f.write(f"{k} = \"{v}\"\n")
+                f.write(f'{k} = "{v}"\n')
             f.write("\n")
 
 
@@ -123,6 +123,7 @@ def load_skill_kernels():
 
 # Adding new kernel mapping functions
 
+
 def save_kernel_mappings(mappings: str) -> None:
     """Save kernel mapping table to the gdsf file."""
     try:
@@ -167,7 +168,43 @@ def load_kernel_theme_mapping():
 # ---------------------------------------------------------------------------
 # Step 4: Emotional Arc helpers
 
-def save_emotional_arc(vignette: str, feelings: str, cohesion: str | None = None) -> None:
+
+def _parse_feelings(feelings: str) -> dict:
+    """Convert user input into a dictionary of feelings."""
+    try:
+        parsed = json.loads(feelings)
+        if isinstance(parsed, dict):
+            return parsed
+        if isinstance(parsed, list):
+            return {str(i + 1): item for i, item in enumerate(parsed)}
+    except Exception:
+        pass
+
+    result: dict[str, str] = {}
+    for line in feelings.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if ":" in line:
+            key, value = line.split(":", 1)
+            result[key.strip()] = value.strip()
+        else:
+            result[str(len(result) + 1)] = line
+    return result
+
+
+def feelings_to_text(feelings: dict | list | str) -> str:
+    """Convert a feelings structure back into readable text."""
+    if isinstance(feelings, dict):
+        return "\n".join(f"{k}: {v}" for k, v in feelings.items())
+    if isinstance(feelings, list):
+        return "\n".join(str(item) for item in feelings)
+    return str(feelings)
+
+
+def save_emotional_arc(
+    vignette: str, feelings: str, cohesion: str | None = None
+) -> None:
     """Save the emotional arc information to the gdsf file."""
     parsed_cohesion = None
     if cohesion not in (None, ""):
@@ -176,8 +213,10 @@ def save_emotional_arc(vignette: str, feelings: str, cohesion: str | None = None
         except Exception:
             parsed_cohesion = cohesion
 
+    parsed_feelings = _parse_feelings(feelings)
+
     data = _load_data()
-    payload = {"vignette": vignette, "feelings": feelings}
+    payload = {"vignette": vignette, "feelings": parsed_feelings}
     if parsed_cohesion is not None:
         payload["cohesion"] = parsed_cohesion
     data["emotional_arc"] = {"value": json.dumps(payload)}
@@ -195,6 +234,7 @@ def load_emotional_arc():
 
 # ---------------------------------------------------------------------------
 # Step 5: Layer Feelings helpers
+
 
 def save_layered_feelings(structure: str) -> None:
     """Save the optional Layer Feelings structure."""
