@@ -499,12 +499,12 @@ def step7_mvp_ideas(bmt: str, messages: List[Dict[str, str]]) -> str:
         """Suggest schema breakdowns for building the MVP."""
 
         system_prompt = f"""
-### STEP 7 – From Base Mechanics Tree to MVP
+### STEP 7 – From Base Mechanics Tree to MVP (Recursive)
 
-You are helping translate the following Base Mechanics Tree into concrete game
-elements for a minimal viable prototype. Suggest a short list of schemas using
-the format `Name: property` (e.g., component, action, rule). Keep each entry
-concise.
+We are breaking down each mechanic step by step. Encourage the user to
+identify concrete game elements, then ask how each one fits the theme and
+functions within the mechanics. Provide short suggestions using the format
+`Name: property` when requested.
 
 Base Mechanics Tree:
 {bmt}
