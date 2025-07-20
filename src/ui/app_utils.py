@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from gdsf import GDSFParser
@@ -235,13 +236,58 @@ def load_emotional_arc():
 # ---------------------------------------------------------------------------
 # Step 5: Layer Feelings helpers
 
+def _parse_layered_feelings(text: str) -> dict:
+    """Parse dash-prefixed text into a nested dictionary."""
+    # attempt JSON first for backwards compatibility
+    try:
+        loaded = json.loads(text)
+        if isinstance(loaded, dict):
+            return loaded
+    except Exception:
+        pass
+
+    lines = [l.rstrip() for l in text.splitlines() if l.strip()]
+    root: dict[str, dict] = {}
+    stack: list[tuple[int, dict]] = [(0, root)]
+
+    for line in lines:
+        stripped = line.lstrip()
+        m = re.match(r"^(?P<dashes>-+)", stripped)
+        if m:
+            level = len(m.group("dashes"))
+            label = stripped[m.end():].strip()
+        else:
+            # allow space-indented bullets
+            m2 = re.match(r"^( *)-+\s*(.+)$", line)
+            if m2:
+                level = int(len(m2.group(1)) / 2) + 1
+                label = m2.group(2).strip()
+            else:
+                level = 1
+                label = stripped
+
+        while stack and stack[-1][0] >= level:
+            stack.pop()
+        parent = stack[-1][1]
+        parent[label] = {}
+        stack.append((level, parent[label]))
+
+    return root
+
+
+def layered_feelings_to_text(data: dict, level: int = 1) -> str:
+    """Convert nested feelings structure back into dash-prefixed lines."""
+    lines: list[str] = []
+    for key, value in data.items():
+        lines.append(f"{'-' * level} {key}")
+        if isinstance(value, dict) and value:
+            lines.append(layered_feelings_to_text(value, level + 1))
+    return "\n".join(lines)
+
 
 def save_layered_feelings(structure: str) -> None:
     """Save the optional Layer Feelings structure."""
-    try:
-        parsed = json.loads(structure)
-    except Exception:
-        parsed = structure
+    parsed = _parse_layered_feelings(structure)
 
     data = _load_data()
     data["layered_feelings"] = {"value": json.dumps(parsed)}

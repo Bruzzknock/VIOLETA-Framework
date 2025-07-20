@@ -10,6 +10,8 @@ if isinstance(feelings, (dict, list)):
     feelings = app_utils.feelings_to_text(feelings)
 
 layer_default = app_utils.load_layered_feelings()
+if isinstance(layer_default, dict):
+    layer_default = app_utils.layered_feelings_to_text(layer_default)
 
 with st.form("step5_form"):
     layer_input = st.text_area(
