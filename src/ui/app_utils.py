@@ -162,3 +162,28 @@ def load_kernel_theme_mapping():
         return json.loads(raw)
     except Exception:
         return raw
+
+
+# ---------------------------------------------------------------------------
+# Step 4: Emotional Arc helpers
+
+def save_emotional_arc(vignette: str, feelings: str, cohesion: str) -> None:
+    """Save the emotional arc information to the gdsf file."""
+    try:
+        parsed_cohesion = json.loads(cohesion)
+    except Exception:
+        parsed_cohesion = cohesion
+
+    data = _load_data()
+    payload = {"vignette": vignette, "feelings": feelings, "cohesion": parsed_cohesion}
+    data["emotional_arc"] = {"value": json.dumps(payload)}
+    _save_data(data)
+
+
+def load_emotional_arc():
+    data = _load_data()
+    raw = data.get("emotional_arc", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return {}
