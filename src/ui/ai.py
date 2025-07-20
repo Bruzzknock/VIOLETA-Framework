@@ -449,3 +449,47 @@ Back-ups
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
+
+
+def step6_mechanic_ideas(
+    layered_feelings: str, medium: str, messages: List[Dict[str, str]]
+) -> str:
+        """Suggest mechanics for each feeling."""
+
+        system_prompt = f"""
+### STEP 6A – Map Feelings to Mechanics
+
+You are brainstorming **{medium} mechanics** that could evoke each emotional
+state listed below. Return concise suggestions using the format
+`Feeling: mechanic1, mechanic2`.
+
+Layer Feelings:
+{layered_feelings}
+
+<example>
+Layer Feelings
+- Progress
+  - Gradual control
+- Constant pressure
+
+Suggestions
+Progress: Deck-building, Skill Tree
+Gradual control: Expanding action options
+Constant pressure: Tight margin of success
+</example>
+        """
+
+        model = ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
+
+        lc_messages = [SystemMessage(content=system_prompt)]
+        for msg in messages:
+                if msg["role"] == "user":
+                        lc_messages.append(HumanMessage(content=msg["content"]))
+                else:
+                        lc_messages.append(AIMessage(content=msg["content"]))
+
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)
