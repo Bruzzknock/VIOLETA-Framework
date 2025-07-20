@@ -1,3 +1,4 @@
+import json
 import re
 import os
 from typing import List, Dict
@@ -43,6 +44,55 @@ the designer’s educational goals, target audience, and contextual constraints.
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
+
+
+def step2_kernels(atomic_unit: str, atomic_skills) -> str:
+        """Generate kernel sentences for each atomic skill recursively."""
+
+        system_prompt = (
+                "You are a helpful assistant for the VIOLETA framework.\n"
+                "Given a single atomic skill, create one or more kernel sentences "
+                "following the Input -> Transformation -> Output pattern. "
+                "Use one active verb per sentence. If a skill requires multiple "
+                "verbs, split it into multiple kernels. Return JSON mapping the "
+                "skill to its kernel list."
+        )
+
+        model = ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
+
+        def _flatten(sk):
+                if isinstance(sk, dict):
+                        result = []
+                        for val in sk.values():
+                                if isinstance(val, list):
+                                        result.extend(val)
+                                else:
+                                        result.append(val)
+                        return result
+                if isinstance(sk, list):
+                        return sk
+                return [s.strip() for s in str(sk).splitlines() if s.strip()]
+
+        skills = _flatten(atomic_skills)
+        results = {}
+
+        for skill in skills:
+                lc_messages = [SystemMessage(content=system_prompt)]
+                lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
+                lc_messages.append(HumanMessage(content=f"Atomic skill: {skill}"))
+
+                response = model.invoke(lc_messages)
+                cleaned = remove_think_block(response.content)
+                try:
+                        data = json.loads(cleaned)
+                except Exception:
+                        data = {skill: cleaned}
+                results.update(data)
+
+        return json.dumps(results, indent=2)
 
 
 
@@ -225,93 +275,6 @@ Our atomic unit: {atomic_unit}
         return remove_think_block(response.content)
 
 
-def step2_kernels(atomic_unit: str, atomic_skills) -> str:
-        """Generate kernel sentences for each atomic skill."""
-        system_prompt = """
-You are a helpful assistant for the VIOLETA framework.
-Given an atomic skills, create a one-sentence kernel for each
-skill. A kernel follows the pattern: Input -> Transformation -> Output and
-uses active verbs and plain language. Use one active verb only per sentence.
-If a skill needs more than one verb, split it into multiple kernels.
-Return the kernels as a JSON object mapping each skill to its kernel sentence.
-
-Examples:
-<example>
-atomic unit: Cryptography
-atomic skill: Encryption
-output:
-{{
-  "Encryption": [
-    {{
-      "kernel":"Transform readable data into unreadable data with a reversible rule.",
-      "input": "readable data",
-      "verb": "transform into",
-      "output": "unreadable data with a reversible rule"
-    }}
-  ]
-}}
-</example>
-
-<example>
-atomic unit: Cryptography
-atomic skill: Hashing
-output:
-{{
-  "Hashing": [
-    {{
-      "kernel": "Condense variable-length data into a fixed-length fingerprint.",
-      "input": "variable-length data",
-      "verb": "condense into",
-      "output": "fixed-length fingerprint"
-    }}
-  ]
-}}
-</example>
-
-<example>
-atomic unit: Cryptography
-atomic skill: Modulo Division Hashing
-{{
-  "Modulo Division Hashing": [
-    {{
-      "kernel": "Divide the key by the table size to obtain its remainder index.",
-      "input": "key and table size",
-      "verb": "divide by",
-      "output": "remainder index"
-    }},
-    {{
-      "kernel": "Add the modulus to a negative key to obtain a positive remainder.",
-      "input": "negative key and modulus",
-      "verb": "add to",
-      "output": "positive remainder"
-    }},
-    {{
-      "kernel": "Link colliding keys into a chain to keep every entry reachable.",
-      "input": "colliding keys at same index",
-      "verb": "link into",
-      "output": "chain with reachable entries"
-    }},
-    {{
-      "kernel": "Divide the number of stored entries by the table size to calculate the load factor.",
-      "input": "number of entries and table size",
-      "verb": "divide by",
-      "output": "load factor"
-    }}
-  ]
-}}
-</example>
-        """
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
-
-        lc_messages = [SystemMessage(content=system_prompt)]
-        lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
-        lc_messages.append(HumanMessage(content=f"Skills: {atomic_skills}"))
-
-        response = model.invoke(lc_messages)
-        return remove_think_block(response.content)
 
 def remove_think_block(text: str) -> str:
         return re.sub(r"<think>.*?</think>\s*","", text, flags=re.DOTALL)
