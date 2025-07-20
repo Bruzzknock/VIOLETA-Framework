@@ -301,3 +301,101 @@ def load_layered_feelings():
         return json.loads(raw)
     except Exception:
         return raw
+
+
+# ---------------------------------------------------------------------------
+# Step 6: Base Mechanics Tree helpers
+
+def save_base_mechanics_tree(structure: str) -> None:
+    """Save the Base Mechanics Tree structure."""
+    parsed = _parse_layered_feelings(structure)
+
+    data = _load_data()
+    data["base_mechanics_tree"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_base_mechanics_tree():
+    data = _load_data()
+    raw = data.get("base_mechanics_tree", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
+# ---------------------------------------------------------------------------
+# Step 6A helpers - mechanic mappings and BMT construction
+
+def _parse_mechanic_mappings(text: str) -> dict:
+    """Convert user text into a mapping of feeling -> [mechanics]."""
+    try:
+        loaded = json.loads(text)
+        if isinstance(loaded, dict):
+            parsed = {}
+            for k, v in loaded.items():
+                if isinstance(v, list):
+                    parsed[k] = [str(i).strip() for i in v]
+                else:
+                    parsed[k] = [str(v).strip()]
+            return parsed
+    except Exception:
+        pass
+
+    result: dict[str, list[str]] = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        for sep in ("->", ":", "="):
+            if sep in line:
+                feeling, mechs = line.split(sep, 1)
+                break
+        else:
+            continue
+        result[feeling.strip()] = [m.strip() for m in re.split(r"[;,]", mechs) if m.strip()]
+    return result
+
+
+def mechanic_mappings_to_text(mapping: dict) -> str:
+    return "\n".join(f"{k}: {', '.join(v)}" for k, v in mapping.items())
+
+
+def save_mechanic_mappings(mappings: str) -> None:
+    parsed = _parse_mechanic_mappings(mappings)
+    data = _load_data()
+    data["mechanic_mappings"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_mechanic_mappings():
+    data = _load_data()
+    raw = data.get("mechanic_mappings", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
+def build_base_mechanics_tree(layered_feelings: dict, mapping: dict) -> dict:
+    """Create a Base Mechanics Tree by replacing feelings with mechanics."""
+
+    def merge(dst: dict, src: dict) -> None:
+        for k, v in src.items():
+            if k in dst:
+                merge(dst[k], v)
+            else:
+                dst[k] = v
+
+    def recurse(node: dict) -> dict:
+        result: dict[str, dict] = {}
+        for feeling, sub in node.items():
+            mechs = mapping.get(feeling, [feeling])
+            child = recurse(sub)
+            for mech in mechs:
+                if mech not in result:
+                    result[mech] = {}
+                merge(result[mech], child)
+        return result
+
+    return recurse(layered_feelings)
