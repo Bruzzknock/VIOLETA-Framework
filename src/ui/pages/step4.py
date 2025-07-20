@@ -12,6 +12,8 @@ stored = app_utils.load_emotional_arc()
 
 vignette_default = stored.get("vignette", "") if stored else ""
 feelings_default = stored.get("feelings", "") if stored else ""
+if isinstance(feelings_default, dict):
+    feelings_default = json.dumps(feelings_default, indent=2)
 
 with st.form("step4_form"):
     vignette_input = st.text_area(
@@ -43,4 +45,3 @@ if prompt:
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)
-
