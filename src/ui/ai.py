@@ -86,6 +86,7 @@ def step2_kernels(atomic_unit: str, atomic_skills) -> str:
 
                 response = model.invoke(lc_messages)
                 cleaned = remove_think_block(response.content)
+                cleaned = remove_code_fences(cleaned)
                 try:
                         data = json.loads(cleaned)
                 except Exception:
@@ -278,6 +279,13 @@ Our atomic unit: {atomic_unit}
 
 def remove_think_block(text: str) -> str:
         return re.sub(r"<think>.*?</think>\s*","", text, flags=re.DOTALL)
+
+
+def remove_code_fences(text: str) -> str:
+        """Strip markdown-style triple backtick fences from the text."""
+        text = re.sub(r"```[a-zA-Z]*\n", "", text)
+        text = text.replace("```", "")
+        return text.strip()
 
 
 def step3(atomic_skills, skill_kernels, messages: List[Dict[str, str]]) -> str:
