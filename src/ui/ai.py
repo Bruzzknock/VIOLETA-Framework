@@ -493,3 +493,34 @@ Constant pressure: Tight margin of success
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
+
+
+def step7_mvp_ideas(bmt: str, messages: List[Dict[str, str]]) -> str:
+        """Suggest schema breakdowns for building the MVP."""
+
+        system_prompt = f"""
+### STEP 7 – From Base Mechanics Tree to MVP
+
+You are helping translate the following Base Mechanics Tree into concrete game
+elements for a minimal viable prototype. Suggest a short list of schemas using
+the format `Name: property` (e.g., component, action, rule). Keep each entry
+concise.
+
+Base Mechanics Tree:
+{bmt}
+        """
+
+        model = ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
+
+        lc_messages = [SystemMessage(content=system_prompt)]
+        for msg in messages:
+                if msg["role"] == "user":
+                        lc_messages.append(HumanMessage(content=msg["content"]))
+                else:
+                        lc_messages.append(AIMessage(content=msg["content"]))
+
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)

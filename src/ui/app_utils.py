@@ -399,3 +399,57 @@ def build_base_mechanics_tree(layered_feelings: dict, mapping: dict) -> dict:
         return result
 
     return recurse(layered_feelings)
+
+
+# ---------------------------------------------------------------------------
+# Step 7: List of Schemas helpers
+
+def _parse_schemas(text: str) -> list:
+    """Convert user text into a list of schema dictionaries."""
+    try:
+        data = json.loads(text)
+        if isinstance(data, list):
+            return data
+    except Exception:
+        pass
+
+    schemas = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if ":" in line:
+            name, prop = line.split(":", 1)
+            schemas.append({"name": name.strip(), "property": prop.strip()})
+        else:
+            schemas.append({"name": line})
+    return schemas
+
+
+def schemas_to_text(schemas: list) -> str:
+    """Serialize a schema list back into readable text."""
+    lines = []
+    for item in schemas:
+        name = item.get("name", "")
+        prop = item.get("property")
+        if prop:
+            lines.append(f"{name}: {prop}")
+        else:
+            lines.append(name)
+    return "\n".join(lines)
+
+
+def save_list_of_schemas(schemas: str) -> None:
+    parsed = _parse_schemas(schemas)
+    data = _load_data()
+    data["list_of_schemas"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_list_of_schemas():
+    data = _load_data()
+    raw = data.get("list_of_schemas", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
