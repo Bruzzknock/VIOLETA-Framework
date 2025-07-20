@@ -12,10 +12,6 @@ stored = app_utils.load_emotional_arc()
 
 vignette_default = stored.get("vignette", "") if stored else ""
 feelings_default = stored.get("feelings", "") if stored else ""
-cohesion_default = stored.get("cohesion", "") if stored else ""
-
-if isinstance(cohesion_default, (dict, list)):
-    cohesion_default = json.dumps(cohesion_default, indent=2)
 
 with st.form("step4_form"):
     vignette_input = st.text_area(
@@ -28,15 +24,10 @@ with st.form("step4_form"):
         value=feelings_default,
         height=80,
     )
-    cohesion_input = st.text_area(
-        "Cohesion table (JSON mapping feeling to triggering skill):",
-        value=cohesion_default,
-        height=120,
-    )
     submitted = st.form_submit_button("Save Emotional Arc")
 
 if submitted:
-    app_utils.save_emotional_arc(vignette_input, feelings_input, cohesion_input)
+    app_utils.save_emotional_arc(vignette_input, feelings_input)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
