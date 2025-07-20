@@ -50,12 +50,80 @@ def step2_kernels(atomic_unit: str, atomic_skills) -> str:
         """Generate kernel sentences for each atomic skill recursively."""
 
         system_prompt = (
-                "You are a helpful assistant for the VIOLETA framework.\n"
-                "Given a single atomic skill, create one or more kernel sentences "
-                "following the Input -> Transformation -> Output pattern. "
-                "Use one active verb per sentence. If a skill requires multiple "
-                "verbs, split it into multiple kernels. Return JSON mapping the "
-                "skill to its kernel list."
+                """
+                You are a helpful assistant for the VIOLETA framework.
+Given an atomic skills, create a one-sentence kernel for each
+skill. A kernel follows the pattern: Input -> Transformation -> Output and
+uses active verbs and plain language. Use one active verb only per sentence.
+If a skill needs more than one verb, split it into multiple kernels.
+Return the kernels as a JSON object mapping each skill to its kernel sentence.
+
+Examples:
+<example>
+atomic unit: Cryptography
+atomic skill: Encryption
+output:
+{{
+  "Encryption": [
+    {{
+      "kernel":"Transform readable data into unreadable data with a reversible rule.",
+      "input": "readable data",
+      "verb": "transform into",
+      "output": "unreadable data with a reversible rule"
+    }}
+  ]
+}}
+</example>
+
+<example>
+atomic unit: Cryptography
+atomic skill: Hashing
+output:
+{{
+  "Hashing": [
+    {{
+      "kernel": "Condense variable-length data into a fixed-length fingerprint.",
+      "input": "variable-length data",
+      "verb": "condense into",
+      "output": "fixed-length fingerprint"
+    }}
+  ]
+}}
+</example>
+
+<example>
+atomic unit: Cryptography
+atomic skill: Modulo Division Hashing
+{{
+  "Modulo Division Hashing": [
+    {{
+      "kernel": "Divide the key by the table size to obtain its remainder index.",
+      "input": "key and table size",
+      "verb": "divide by",
+      "output": "remainder index"
+    }},
+    {{
+      "kernel": "Add the modulus to a negative key to obtain a positive remainder.",
+      "input": "negative key and modulus",
+      "verb": "add to",
+      "output": "positive remainder"
+    }},
+    {{
+      "kernel": "Link colliding keys into a chain to keep every entry reachable.",
+      "input": "colliding keys at same index",
+      "verb": "link into",
+      "output": "chain with reachable entries"
+    }},
+    {{
+      "kernel": "Divide the number of stored entries by the table size to calculate the load factor.",
+      "input": "number of entries and table size",
+      "verb": "divide by",
+      "output": "load factor"
+    }}
+  ]
+}}
+</example>
+                """
         )
 
         model = ChatOllama(
