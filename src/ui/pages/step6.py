@@ -23,7 +23,7 @@ else:
     bmt_text = bmt
 
 if "medium" not in st.session_state:
-    st.session_state.medium = "Video games"
+    st.session_state.medium = "Board games"
 medium = st.radio(
     "Prefer mechanics from:",
     ["Video games", "Board games"],
