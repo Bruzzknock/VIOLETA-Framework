@@ -15,5 +15,8 @@ an Individual Contributor Licence Agreement (one-click via GitHub).
 By signing, you permit the project to re-license your contribution in
 both the open-source and proprietary editions.
 
-# All Infomratoin Can Be Found Here:
+# All Information Can Be Found Here:
 linktr.ee/violeta.framework
+
+## Step 7 Workflow
+During the "Theme" stage you can now click **Done** to store an element without adding it back into the queue for further breakdown.
