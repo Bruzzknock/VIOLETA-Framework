@@ -10,6 +10,20 @@ def _rerun():
     else:
         st.experimental_rerun()
 
+
+def _save_queue(include_current: bool = False) -> None:
+    """Persist the current queue, optionally including the active item."""
+    queue = list(st.session_state.rec_queue)
+    if include_current and st.session_state.get("current") is not None:
+        queue = [
+            {
+                "name": st.session_state.current,
+                "parent": st.session_state.parent,
+                "stage": st.session_state.stage or "decompose",
+            }
+        ] + queue
+    app_utils.save_step7_queue(queue)
+
 st.header("Step 7 - Build the MVP")
 
 # medium preference saved from Step 6
@@ -57,28 +71,43 @@ if "rec_queue" not in st.session_state:
     if saved_queue:
         converted = []
         for item in saved_queue:
-            if isinstance(item, list) and len(item) == 2:
+            if isinstance(item, dict):
                 converted.append(item)
+            elif isinstance(item, list):
+                if len(item) == 3:
+                    name, parent, stage = item
+                    converted.append({"name": name, "parent": parent, "stage": stage})
+                elif len(item) == 2:
+                    name, parent = item
+                    converted.append({"name": name, "parent": parent, "stage": "decompose"})
             else:
-                converted.append([item, ""])
+                converted.append({"name": str(item), "parent": "", "stage": "decompose"})
         st.session_state.rec_queue = converted
     else:
         processed = {item.get("name") for item in initial_schemas}
-        st.session_state.rec_queue = [[m, ""] for m in root_mechanics if m not in processed]
+        st.session_state.rec_queue = [
+            {"name": m, "parent": "", "stage": "decompose"}
+            for m in root_mechanics
+            if m not in processed
+        ]
     st.session_state.current = None
     st.session_state.parent = ""
     st.session_state.stage = None
     st.session_state.schemas = list(initial_schemas)
-    app_utils.save_step7_queue(st.session_state.rec_queue)
+    _save_queue()
 
 if st.button("Reset Recursive Workflow"):
     processed = {item.get("name") for item in initial_schemas}
-    st.session_state.rec_queue = [[m, ""] for m in root_mechanics if m not in processed]
+    st.session_state.rec_queue = [
+        {"name": m, "parent": "", "stage": "decompose"}
+        for m in root_mechanics
+        if m not in processed
+    ]
     st.session_state.current = None
     st.session_state.parent = ""
     st.session_state.stage = None
     st.session_state.schemas = list(initial_schemas)
-    app_utils.save_step7_queue(st.session_state.rec_queue)
+    _save_queue()
     _rerun()
 
 # ---------------------------------------------------------------------------
@@ -86,10 +115,15 @@ if st.button("Reset Recursive Workflow"):
 if st.session_state.rec_queue or st.session_state.stage:
     if st.session_state.current is None:
         item = st.session_state.rec_queue.pop(0)
-        st.session_state.current = item[0]
-        st.session_state.parent = item[1]
-        app_utils.save_step7_queue(st.session_state.rec_queue)
-        st.session_state.stage = "decompose"
+        if isinstance(item, dict):
+            st.session_state.current = item.get("name")
+            st.session_state.parent = item.get("parent", "")
+            st.session_state.stage = item.get("stage", "decompose")
+        else:
+            st.session_state.current = item[0]
+            st.session_state.parent = item[1] if len(item) > 1 else ""
+            st.session_state.stage = "decompose"
+        _save_queue(include_current=True)
         st.session_state.messages = []
 
     mech = st.session_state.current
@@ -111,12 +145,22 @@ if st.session_state.rec_queue or st.session_state.stage:
                     continue
                 if ":" in line:
                     name, _ = line.split(":", 1)
-                    parsed.append([name.strip(), mech])
+                    parsed.append({"name": name.strip(), "parent": mech, "stage": "decompose"})
                 else:
-                    parsed.append([line, mech])
+                    parsed.append({"name": line, "parent": mech, "stage": "decompose"})
             if parsed:
-                st.session_state.rec_queue = parsed + st.session_state.rec_queue
-                app_utils.save_step7_queue(st.session_state.rec_queue)
+                st.session_state.rec_queue = (
+                    [
+                        {
+                            "name": mech,
+                            "parent": st.session_state.parent,
+                            "stage": "theme",
+                        }
+                    ]
+                    + parsed
+                    + st.session_state.rec_queue
+                )
+                _save_queue()
                 st.session_state.current = None
                 st.session_state.parent = ""
                 st.session_state.stage = None
@@ -137,8 +181,10 @@ if st.session_state.rec_queue or st.session_state.stage:
             save = st.form_submit_button("Save Element")
         if save:
             st.session_state.schemas.append({"name": mech, "property": prop})
-            app_utils.save_list_of_schemas(app_utils.schemas_to_text(st.session_state.schemas))
-            app_utils.save_step7_queue(st.session_state.rec_queue)
+            app_utils.save_list_of_schemas(
+                app_utils.schemas_to_text(st.session_state.schemas)
+            )
+            _save_queue()
             st.session_state.current = None
             st.session_state.parent = ""
             st.session_state.stage = None
