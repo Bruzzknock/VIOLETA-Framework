@@ -85,11 +85,19 @@ if st.session_state.rec_queue or st.session_state.stage:
                 key="elements_input",
             )
             submitted = st.form_submit_button("Next")
+            done = st.form_submit_button("Done")
         if submitted:
             elements = [e.strip() for e in elements_text.splitlines() if e.strip()]
             st.session_state.new_elements = elements
             st.session_state.stage = "theme"
             st.session_state.messages = []  # reset chat for theme fit
+            _rerun()
+        elif done:
+            st.session_state.schemas.append({"name": mech, "property": ""})
+            st.session_state.current = None
+            st.session_state.stage = None
+            st.session_state.new_elements = []
+            st.session_state.messages = []
             _rerun()
 
     elif st.session_state.stage == "theme":
@@ -99,8 +107,7 @@ if st.session_state.rec_queue or st.session_state.stage:
             for el in st.session_state.new_elements:
                 inputs[el] = st.text_input(el, key=f"theme_{el}")
             save = st.form_submit_button("Save Element")
-            done = st.form_submit_button("Done")
-        if save or done:
+        if save:
             for el in st.session_state.new_elements:
                 prop = st.session_state.get(f"theme_{el}", "")
                 st.session_state.schemas.append({"name": el, "property": prop})
