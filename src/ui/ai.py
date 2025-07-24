@@ -4,11 +4,26 @@ import os
 from typing import List, Dict
 
 from dotenv import load_dotenv
-from langchain_ollama import ChatOllama, OllamaLLM
+from langchain_ollama import ChatOllama
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 
 load_dotenv(override=True)
+
+
+def get_llm():
+        """Return a chat model using Gemini if available, otherwise Ollama."""
+        gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GEMINI_KEY")
+        if gemini_key:
+                return ChatGoogleGenerativeAI(
+                        model="gemini-pro",
+                        google_api_key=gemini_key,
+                )
+        return ChatOllama(
+                model="deepseek-r1:14b",
+                base_url=os.environ["OLLAMA_HOST"],
+        )
 
 def step1(messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing an atomic unit."""
@@ -30,10 +45,7 @@ arithmetic—or as broad as an entire interdisciplinary domain, such as
 systems thinking or quantum physics. The choice of atomic unit depends on
 the designer’s educational goals, target audience, and contextual constraints.
         """
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
+        model = get_llm()
 
         lc_messages = [HumanMessage(content=system_prompt)]
         for msg in messages:
@@ -126,10 +138,7 @@ atomic skill: Modulo Division Hashing
                 """
         )
 
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
+        model = get_llm()
 
         def _flatten(sk):
                 if isinstance(sk, dict):
@@ -191,10 +200,7 @@ in Arcanecode is not just a talent; it is essential for survival and success in 
 
 Our Atomic Skills: {atomic_skills}
         """
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
+        model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
 
@@ -258,10 +264,7 @@ output:
 }
 </example>
         """
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
+        model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
         lc_messages.append(HumanMessage(content=f"Theme: {theme}"))
@@ -326,10 +329,7 @@ These examples illustrate *one* valid decomposition. Adapt the granularity and w
 
 Our atomic unit: {atomic_unit}
         """
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
+        model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
 
@@ -389,10 +389,7 @@ Accomplishment: Overcoming a complex problem using this skill fills them with pr
 </example output>
         """
 
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
+        model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
         for msg in messages:
@@ -474,10 +471,7 @@ Back-ups
 
         """
 
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
+        model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
         for msg in messages:
@@ -518,10 +512,7 @@ Constant pressure: Tight margin of success
 </example>
         """
 
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
+        model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
         for msg in messages:
@@ -549,10 +540,7 @@ Base Mechanics Tree:
 {bmt}
         """
 
-        model = ChatOllama(
-                model="deepseek-r1:14b",
-                base_url=os.environ["OLLAMA_HOST"],
-        )
+        model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
         for msg in messages:
