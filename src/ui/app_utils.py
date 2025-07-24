@@ -501,3 +501,51 @@ def load_step7_queue() -> list:
         return json.loads(raw)
     except Exception:
         return []
+
+# ---------------------------------------------------------------------------
+# Step 8: Scaling Influence Table helpers
+
+def _parse_sit(text: str) -> dict:
+    """Parse SIT text into a dict mapping skill -> [emotions]."""
+    try:
+        loaded = json.loads(text)
+        if isinstance(loaded, dict):
+            return {str(k): list(v) for k, v in loaded.items()}
+    except Exception:
+        pass
+    result: dict[str, list[str]] = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        for sep in ("->", ":", "="):
+            if sep in line:
+                skill, emos = line.split(sep, 1)
+                break
+        else:
+            continue
+        result[skill.strip()] = [e.strip() for e in re.split(r"[;,]", emos) if e.strip()]
+    return result
+
+
+def sit_to_text(table: dict) -> str:
+    return "\n".join(f"{k}: {', '.join(v)}" for k, v in table.items())
+
+
+def save_sit(table: str | dict) -> None:
+    if isinstance(table, dict):
+        parsed = table
+    else:
+        parsed = _parse_sit(table)
+    data = _load_data()
+    data["sit_table"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_sit():
+    data = _load_data()
+    raw = data.get("sit_table", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw

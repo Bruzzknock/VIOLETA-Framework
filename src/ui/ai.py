@@ -607,3 +607,31 @@ Provide short suggestions on how this element could represent or operate within 
 
     response = model.invoke(lc_messages)
     return remove_think_block(response.content)
+
+def step8_sit_ideas(skills, emotions, messages: List[Dict[str, str]]) -> str:
+    """Suggest direct skill → emotion links for the SIT."""
+
+    skills_text = ", ".join(skills)
+    emo_text = ", ".join(emotions)
+    system_prompt = f"""
+### STEP 8 – Scaling Influence Table
+
+Skills:
+{skills_text}
+
+Emotions:
+{emo_text}
+
+Suggest which skills directly influence which emotions. Respond using the format `Skill: emotion1, emotion2` for a few likely connections. Only include direct effects.
+"""
+    model = get_llm()
+
+    lc_messages = [SystemMessage(content=system_prompt)]
+    for msg in messages:
+        if msg["role"] == "user":
+            lc_messages.append(HumanMessage(content=msg["content"]))
+        else:
+            lc_messages.append(AIMessage(content=msg["content"]))
+
+    response = model.invoke(lc_messages)
+    return remove_think_block(response.content)
