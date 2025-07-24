@@ -5,3 +5,4 @@ pydantic
 plotly
 langchain
 langchain-ollama
+langchain-google-genai
