@@ -4,6 +4,9 @@ import ai
 
 st.header("Step 7 - Build the MVP")
 
+# medium preference saved from Step 6
+medium = st.session_state.get("medium", "Video games")
+
 # ---------------------------------------------------------------------------
 # Load data
 bmt = app_utils.load_base_mechanics_tree()
@@ -57,6 +60,8 @@ if st.session_state.rec_queue or st.session_state.stage:
     if st.session_state.current is None:
         st.session_state.current = st.session_state.rec_queue.pop(0)
         st.session_state.stage = "decompose"
+        # reset chat messages for the new mechanic
+        st.session_state.messages = []
 
     mech = st.session_state.current
     st.subheader(f"Break down: {mech}")
@@ -111,7 +116,7 @@ prompt = st.chat_input("Generate Ideas")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.spinner("Generating answer..."):
-        answer = ai.step7_mvp_ideas(bmt_text, st.session_state.messages)
+        answer = ai.step7_mvp_ideas(bmt_text, medium, st.session_state.messages)
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)
