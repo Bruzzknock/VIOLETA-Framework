@@ -22,7 +22,14 @@ if isinstance(bmt, dict):
 else:
     bmt_text = bmt
 
-medium = st.radio("Prefer mechanics from:", ["Video games", "Board games"])
+if "medium" not in st.session_state:
+    st.session_state.medium = "Video games"
+medium = st.radio(
+    "Prefer mechanics from:",
+    ["Video games", "Board games"],
+    index=0 if st.session_state.medium == "Video games" else 1,
+)
+st.session_state.medium = medium
 
 with st.form("step6_form"):
     st.text_area("Layer Feelings (reference)", layer_text, height=120, disabled=True)
