@@ -2,7 +2,18 @@ import streamlit as st
 import app_utils
 import ai
 
+
+def _rerun():
+    """Trigger a Streamlit rerun compatible across versions."""
+    if hasattr(st, "rerun"):
+        st.rerun()
+    else:
+        st.experimental_rerun()
+
 st.header("Step 7 - Build the MVP")
+
+# medium preference saved from Step 6
+medium = st.session_state.get("medium", "Video games")
 
 # ---------------------------------------------------------------------------
 # Load data
@@ -49,7 +60,7 @@ if st.button("Reset Recursive Workflow"):
     st.session_state.stage = None
     st.session_state.new_elements = []
     st.session_state.schemas = list(initial_schemas)
-    st.experimental_rerun()
+    _rerun()
 
 # ---------------------------------------------------------------------------
 # Recursive data entry
@@ -57,6 +68,8 @@ if st.session_state.rec_queue or st.session_state.stage:
     if st.session_state.current is None:
         st.session_state.current = st.session_state.rec_queue.pop(0)
         st.session_state.stage = "decompose"
+        # reset chat messages for the new mechanic
+        st.session_state.messages = []
 
     mech = st.session_state.current
     st.subheader(f"Break down: {mech}")
@@ -72,7 +85,7 @@ if st.session_state.rec_queue or st.session_state.stage:
             elements = [e.strip() for e in elements_text.splitlines() if e.strip()]
             st.session_state.new_elements = elements
             st.session_state.stage = "theme"
-            st.experimental_rerun()
+            _rerun()
 
     elif st.session_state.stage == "theme":
         st.markdown("**For each element, describe its thematic meaning and function.**")
@@ -89,7 +102,7 @@ if st.session_state.rec_queue or st.session_state.stage:
             st.session_state.current = None
             st.session_state.stage = None
             st.session_state.new_elements = []
-            st.experimental_rerun()
+            _rerun()
 
 else:
     st.success("All mechanics processed.")
@@ -111,7 +124,7 @@ prompt = st.chat_input("Generate Ideas")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.spinner("Generating answer..."):
-        answer = ai.step7_mvp_ideas(bmt_text, st.session_state.messages)
+        answer = ai.step7_mvp_ideas(bmt_text, medium, st.session_state.messages)
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)

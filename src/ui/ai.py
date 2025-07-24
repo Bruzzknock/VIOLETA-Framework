@@ -532,16 +532,16 @@ Constant pressure: Tight margin of success
         return remove_think_block(response.content)
 
 
-def step7_mvp_ideas(bmt: str, messages: List[Dict[str, str]]) -> str:
+def step7_mvp_ideas(bmt: str, medium: str, messages: List[Dict[str, str]]) -> str:
         """Suggest schema breakdowns for building the MVP."""
 
         system_prompt = f"""
 ### STEP 7 – From Base Mechanics Tree to MVP (Recursive)
 
-We are breaking down each mechanic step by step. Encourage the user to
-identify concrete game elements, then ask how each one fits the theme and
-functions within the mechanics. Provide short suggestions using the format
-`Name: property` when requested.
+We are designing for {medium.lower()}. Break down each mechanic step by step.
+Encourage the user to identify concrete game elements, then ask how each one
+fits the theme and functions within the mechanics. Provide short suggestions
+using the format `Name: property` when requested.
 
 Base Mechanics Tree:
 {bmt}
