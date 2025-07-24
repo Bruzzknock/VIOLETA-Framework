@@ -5,13 +5,13 @@ import ai
 st.header("Step 1 - Atomic unit")
 
 with st.form("step1_form"):
-    atmoic_unit_input = st.text_input(
+    atomic_unit_input = st.text_input(
         "What is the atomic unit that the game should be based on?"
     )
     submitted = st.form_submit_button("Next")
 
 if submitted:
-    app_utils.save_atomic_unit(atmoic_unit_input)
+    app_utils.save_atomic_unit(atomic_unit_input)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []

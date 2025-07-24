@@ -8,7 +8,7 @@ st.header("Step 2 - Atomic Skills & Kernels")
 atomic_unit = app_utils.load_atomic_unit()
 
 with st.form("step2_form"):
-    atmoic_skills_input = st.text_area(
+    atomic_skills_input = st.text_area(
         "What knowledge, actions, and/or skills are necessary to master this atomic unit?\n\n"
         "You can group skills by entering a category name followed by its skills on separate lines.\n"
         "Leave a blank line between categories.",
@@ -17,7 +17,7 @@ with st.form("step2_form"):
     submitted = st.form_submit_button("Next")
 
 if submitted:
-    app_utils.save_atomic_skills(atmoic_skills_input)
+    app_utils.save_atomic_skills(atomic_skills_input)
 
 st.subheader("Skill Kernels")
 

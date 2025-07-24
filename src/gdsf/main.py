@@ -42,7 +42,7 @@ class GDSFParser:
                 self.sections[section] = current
     
     def _validate_schema(self, schema, line_num):
-        prop = schema.get("property").replace(" ", "")
+        prop = schema.get("property", "").replace(" ", "")
         schema_id = schema.get("id")
 
         if "name" not in schema:

@@ -33,6 +33,10 @@ else:
     schemas_text = str(existing)
     initial_schemas = []
 
+# Load theme vignette and kernel mappings for theme-fit assistance
+vignette = app_utils.load_emotional_arc().get("vignette", "")
+kernel_mappings = app_utils.load_kernel_theme_mapping()
+
 # ---------------------------------------------------------------------------
 # Manual edit of the final List of Schemas
 with st.form("step7_form"):
@@ -85,6 +89,7 @@ if st.session_state.rec_queue or st.session_state.stage:
             elements = [e.strip() for e in elements_text.splitlines() if e.strip()]
             st.session_state.new_elements = elements
             st.session_state.stage = "theme"
+            st.session_state.messages = []  # reset chat for theme fit
             _rerun()
 
     elif st.session_state.stage == "theme":
@@ -104,6 +109,7 @@ if st.session_state.rec_queue or st.session_state.stage:
             st.session_state.current = None
             st.session_state.stage = None
             st.session_state.new_elements = []
+            st.session_state.messages = []  # reset chat after element saved
             _rerun()
 
 else:
@@ -126,8 +132,19 @@ prompt = st.chat_input("Generate Ideas")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.spinner("Generating answer..."):
-        mech = st.session_state.get("current", "") or bmt_text
-        answer = ai.step7_mvp_ideas(mech, medium, st.session_state.messages)
+        if st.session_state.get("stage") == "theme":
+            parent = st.session_state.get("current", "")
+            element = ", ".join(st.session_state.get("new_elements", []))
+            answer = ai.step7_theme_fit(
+                vignette,
+                kernel_mappings,
+                parent,
+                element,
+                st.session_state.messages,
+            )
+        else:
+            mech = st.session_state.get("current", "") or bmt_text
+            answer = ai.step7_mvp_ideas(mech, medium, st.session_state.messages)
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)
