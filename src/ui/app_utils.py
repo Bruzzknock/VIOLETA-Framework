@@ -335,6 +335,23 @@ def load_base_mechanics_tree():
         return raw
 
 
+def flatten_mechanics(tree: dict) -> list:
+    """Return a flat list of unique mechanics in a BMT."""
+    result: list[str] = []
+    seen: set[str] = set()
+
+    def recurse(node: dict) -> None:
+        for k, v in node.items():
+            if k not in seen:
+                seen.add(k)
+                result.append(k)
+            if isinstance(v, dict):
+                recurse(v)
+
+    recurse(tree)
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Step 6A helpers - mechanic mappings and BMT construction
 

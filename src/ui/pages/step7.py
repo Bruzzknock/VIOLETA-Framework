@@ -20,7 +20,7 @@ medium = st.session_state.get("medium", "Video games")
 bmt = app_utils.load_base_mechanics_tree()
 if isinstance(bmt, dict):
     bmt_text = app_utils.layered_feelings_to_text(bmt)
-    root_mechanics = list(bmt.keys())
+    root_mechanics = app_utils.flatten_mechanics(bmt)
 else:
     bmt_text = str(bmt)
     root_mechanics = []
@@ -55,22 +55,28 @@ if submitted:
 # Recursive workflow state management
 if "rec_queue" not in st.session_state:
     if saved_queue:
-        st.session_state.rec_queue = list(saved_queue)
+        converted = []
+        for item in saved_queue:
+            if isinstance(item, list) and len(item) == 2:
+                converted.append(item)
+            else:
+                converted.append([item, ""])
+        st.session_state.rec_queue = converted
     else:
         processed = {item.get("name") for item in initial_schemas}
-        st.session_state.rec_queue = [m for m in root_mechanics if m not in processed]
+        st.session_state.rec_queue = [[m, ""] for m in root_mechanics if m not in processed]
     st.session_state.current = None
+    st.session_state.parent = ""
     st.session_state.stage = None
-    st.session_state.new_elements = []
     st.session_state.schemas = list(initial_schemas)
     app_utils.save_step7_queue(st.session_state.rec_queue)
 
 if st.button("Reset Recursive Workflow"):
     processed = {item.get("name") for item in initial_schemas}
-    st.session_state.rec_queue = [m for m in root_mechanics if m not in processed]
+    st.session_state.rec_queue = [[m, ""] for m in root_mechanics if m not in processed]
     st.session_state.current = None
+    st.session_state.parent = ""
     st.session_state.stage = None
-    st.session_state.new_elements = []
     st.session_state.schemas = list(initial_schemas)
     app_utils.save_step7_queue(st.session_state.rec_queue)
     _rerun()
@@ -79,10 +85,11 @@ if st.button("Reset Recursive Workflow"):
 # Recursive data entry
 if st.session_state.rec_queue or st.session_state.stage:
     if st.session_state.current is None:
-        st.session_state.current = st.session_state.rec_queue.pop(0)
+        item = st.session_state.rec_queue.pop(0)
+        st.session_state.current = item[0]
+        st.session_state.parent = item[1]
         app_utils.save_step7_queue(st.session_state.rec_queue)
         st.session_state.stage = "decompose"
-        # reset chat messages for the new mechanic
         st.session_state.messages = []
 
     mech = st.session_state.current
@@ -91,45 +98,51 @@ if st.session_state.rec_queue or st.session_state.stage:
     if st.session_state.stage == "decompose":
         with st.form("decompose_form"):
             elements_text = st.text_area(
-                "Which concrete game elements does this mechanic consist of?",
+                "List elements for this mechanic (Name: description)",
                 key="elements_input",
             )
             submitted = st.form_submit_button("Next")
             done = st.form_submit_button("Done")
         if submitted:
-            elements = [e.strip() for e in elements_text.splitlines() if e.strip()]
-            st.session_state.new_elements = elements
-            st.session_state.stage = "theme"
-            st.session_state.messages = []  # reset chat for theme fit
-            _rerun()
+            parsed = []
+            for line in elements_text.splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                if ":" in line:
+                    name, _ = line.split(":", 1)
+                    parsed.append([name.strip(), mech])
+                else:
+                    parsed.append([line, mech])
+            if parsed:
+                st.session_state.rec_queue = parsed + st.session_state.rec_queue
+                app_utils.save_step7_queue(st.session_state.rec_queue)
+                st.session_state.current = None
+                st.session_state.parent = ""
+                st.session_state.stage = None
+                st.session_state.messages = []
+                _rerun()
+            else:
+                st.session_state.stage = "theme"
+                st.session_state.messages = []
+                _rerun()
         elif done:
-            st.session_state.schemas.append({"name": mech, "property": ""})
-            app_utils.save_list_of_schemas(app_utils.schemas_to_text(st.session_state.schemas))
-            app_utils.save_step7_queue(st.session_state.rec_queue)
-            st.session_state.current = None
-            st.session_state.stage = None
-            st.session_state.new_elements = []
+            st.session_state.stage = "theme"
             st.session_state.messages = []
             _rerun()
 
     elif st.session_state.stage == "theme":
-        st.markdown("**For each element, describe its thematic meaning and function.**")
         with st.form("theme_form"):
-            inputs = {}
-            for el in st.session_state.new_elements:
-                inputs[el] = st.text_input(el, key=f"theme_{el}")
+            prop = st.text_area("Thematic function", key="theme_input")
             save = st.form_submit_button("Save Element")
         if save:
-            for el in st.session_state.new_elements:
-                prop = st.session_state.get(f"theme_{el}", "")
-                st.session_state.schemas.append({"name": el, "property": prop})
-                st.session_state.rec_queue.append(el)
+            st.session_state.schemas.append({"name": mech, "property": prop})
             app_utils.save_list_of_schemas(app_utils.schemas_to_text(st.session_state.schemas))
             app_utils.save_step7_queue(st.session_state.rec_queue)
             st.session_state.current = None
+            st.session_state.parent = ""
             st.session_state.stage = None
-            st.session_state.new_elements = []
-            st.session_state.messages = []  # reset chat after element saved
+            st.session_state.messages = []
             _rerun()
 
 else:
@@ -154,8 +167,8 @@ if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.spinner("Generating answer..."):
         if st.session_state.get("stage") == "theme":
-            parent = st.session_state.get("current", "")
-            element = ", ".join(st.session_state.get("new_elements", []))
+            parent = st.session_state.get("parent", "")
+            element = st.session_state.get("current", "")
             answer = ai.step7_theme_fit(
                 vignette,
                 kernel_mappings,
