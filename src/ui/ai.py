@@ -532,19 +532,19 @@ Constant pressure: Tight margin of success
         return remove_think_block(response.content)
 
 
-def step7_mvp_ideas(bmt: str, medium: str, messages: List[Dict[str, str]]) -> str:
+def step7_mvp_ideas(mechanic: str, medium: str, messages: List[Dict[str, str]]) -> str:
         """Suggest schema breakdowns for building the MVP."""
 
         system_prompt = f"""
 ### STEP 7 – From Base Mechanics Tree to MVP (Recursive)
 
-We are designing for {medium.lower()}. Break down each mechanic step by step.
+We are designing for {medium.lower()}. Break down the mechanic "{mechanic}" step by step.
 Encourage the user to identify concrete game elements, then ask how each one
 functions within the mechanics. Provide 3-5 short suggestions
 using the format `Name: Description`.
 
 <example>
-BMT Mechanic:
+Mechanic:
 Deck Building
 
 Suggestions:
@@ -554,8 +554,8 @@ Supply Piles: Stacks of identical cards. Players can purchase or acquire cards f
 Victory Point Cards: Cards that, when acquired into a deck, contribute to a player's final score but often clog the deck during gameplay.
 etc...
 </example>
-Base Mechanics Tree:
-{bmt}
+Target Mechanic:
+{mechanic}
         """
 
         model = get_llm()

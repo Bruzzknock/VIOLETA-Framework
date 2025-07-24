@@ -93,12 +93,14 @@ if st.session_state.rec_queue or st.session_state.stage:
             inputs = {}
             for el in st.session_state.new_elements:
                 inputs[el] = st.text_input(el, key=f"theme_{el}")
-            submitted = st.form_submit_button("Save Element")
-        if submitted:
+            save = st.form_submit_button("Save Element")
+            done = st.form_submit_button("Done")
+        if save or done:
             for el in st.session_state.new_elements:
                 prop = st.session_state.get(f"theme_{el}", "")
                 st.session_state.schemas.append({"name": el, "property": prop})
-                st.session_state.rec_queue.append(el)
+                if save:
+                    st.session_state.rec_queue.append(el)
             st.session_state.current = None
             st.session_state.stage = None
             st.session_state.new_elements = []
@@ -124,7 +126,8 @@ prompt = st.chat_input("Generate Ideas")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.spinner("Generating answer..."):
-        answer = ai.step7_mvp_ideas(bmt_text, medium, st.session_state.messages)
+        mech = st.session_state.get("current", "") or bmt_text
+        answer = ai.step7_mvp_ideas(mech, medium, st.session_state.messages)
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)
