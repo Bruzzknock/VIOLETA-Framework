@@ -25,3 +25,9 @@ value = "{"Grim Responsibility": ["Crisis Management"], "Anxious Focus": ["Tight
 [base_mechanics_tree]
 value = "{"Crisis Management": {"Tight Action Economy": {}, "Dice Mitigation": {}}}"
 
+[step7_queue]
+value = "[["Tight Action Economy", ""], ["Dice Mitigation", ""]]"
+
+[list_of_schemas]
+value = "[{"name": "Re-roll Tokens", "property": "Scavenge Deeper: Represents spending extra time or risking more to re-search a depleted area, hoping for a better foraging yield."}, {"name": "Vulnerability Targeting", "property": "Nutrient Prioritization: Recognize specific deficiencies (e.g., scurvy, muscle wasting) in individuals and focus available resources to provide the missing vitamins or protein."}]"
+

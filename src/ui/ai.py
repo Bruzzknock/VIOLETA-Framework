@@ -25,7 +25,7 @@ def get_llm():
                                 "langchain_google_genai must be installed to use Gemini"
                         )
                 return ChatGoogleGenerativeAI(
-                        model="gemini-2.5-pro",
+                        model="gemini-2.5-flash", #gemini-2.5-flash #gemini-2.5-pro
                         google_api_key=gemini_key,
                 )
         return ChatOllama(
