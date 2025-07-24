@@ -102,6 +102,17 @@ def load_theme() -> str:
     return data.get("theme", {}).get("value", "")
 
 
+def save_theme_name(name: str) -> None:
+    data = _load_data()
+    data["theme_name"] = {"value": name}
+    _save_data(data)
+
+
+def load_theme_name() -> str:
+    data = _load_data()
+    return data.get("theme_name", {}).get("value", "")
+
+
 def save_skill_kernels(kernels: str) -> None:
     """Save skill kernels JSON or raw string to the gdsf file."""
     try:

@@ -8,6 +8,7 @@ st.header("Step 3 - Theme & Kernel Mapping")
 atomic_skills = app_utils.load_atomic_skills()
 skill_kernels = app_utils.load_skill_kernels()
 theme = app_utils.load_theme()
+theme_name = app_utils.load_theme_name()
 
 with st.form("step3_form"):
     theme_input = st.text_area(
@@ -15,10 +16,15 @@ with st.form("step3_form"):
         value=theme,
         height=80,
     )
+    theme_name_input = st.text_input(
+        "Provide a short name for this theme:",
+        value=theme_name,
+    )
     submitted = st.form_submit_button("Save Theme")
 
 if submitted:
     app_utils.save_theme(theme_input)
+    app_utils.save_theme_name(theme_name_input)
 
 st.subheader("Kernel Mapping Table")
 
