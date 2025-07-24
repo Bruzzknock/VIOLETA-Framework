@@ -464,3 +464,23 @@ def load_list_of_schemas():
         return json.loads(raw)
     except Exception:
         return raw
+
+
+# ---------------------------------------------------------------------------
+# Step 7 queue persistence helpers
+
+def save_step7_queue(queue: list) -> None:
+    """Persist the remaining Step 7 queue to the gdsf file."""
+    data = _load_data()
+    data["step7_queue"] = {"value": json.dumps(queue)}
+    _save_data(data)
+
+
+def load_step7_queue() -> list:
+    """Load the saved Step 7 queue if present."""
+    data = _load_data()
+    raw = data.get("step7_queue", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return []

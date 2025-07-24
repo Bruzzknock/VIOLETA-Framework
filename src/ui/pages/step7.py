@@ -25,6 +25,8 @@ else:
     bmt_text = str(bmt)
     root_mechanics = []
 
+saved_queue = app_utils.load_step7_queue()
+
 existing = app_utils.load_list_of_schemas()
 if isinstance(existing, list):
     schemas_text = app_utils.schemas_to_text(existing)
@@ -52,18 +54,25 @@ if submitted:
 # ---------------------------------------------------------------------------
 # Recursive workflow state management
 if "rec_queue" not in st.session_state:
-    st.session_state.rec_queue = list(root_mechanics)
+    if saved_queue:
+        st.session_state.rec_queue = list(saved_queue)
+    else:
+        processed = {item.get("name") for item in initial_schemas}
+        st.session_state.rec_queue = [m for m in root_mechanics if m not in processed]
     st.session_state.current = None
     st.session_state.stage = None
     st.session_state.new_elements = []
     st.session_state.schemas = list(initial_schemas)
+    app_utils.save_step7_queue(st.session_state.rec_queue)
 
 if st.button("Reset Recursive Workflow"):
-    st.session_state.rec_queue = list(root_mechanics)
+    processed = {item.get("name") for item in initial_schemas}
+    st.session_state.rec_queue = [m for m in root_mechanics if m not in processed]
     st.session_state.current = None
     st.session_state.stage = None
     st.session_state.new_elements = []
     st.session_state.schemas = list(initial_schemas)
+    app_utils.save_step7_queue(st.session_state.rec_queue)
     _rerun()
 
 # ---------------------------------------------------------------------------
@@ -71,6 +80,7 @@ if st.button("Reset Recursive Workflow"):
 if st.session_state.rec_queue or st.session_state.stage:
     if st.session_state.current is None:
         st.session_state.current = st.session_state.rec_queue.pop(0)
+        app_utils.save_step7_queue(st.session_state.rec_queue)
         st.session_state.stage = "decompose"
         # reset chat messages for the new mechanic
         st.session_state.messages = []
@@ -94,6 +104,8 @@ if st.session_state.rec_queue or st.session_state.stage:
             _rerun()
         elif done:
             st.session_state.schemas.append({"name": mech, "property": ""})
+            app_utils.save_list_of_schemas(app_utils.schemas_to_text(st.session_state.schemas))
+            app_utils.save_step7_queue(st.session_state.rec_queue)
             st.session_state.current = None
             st.session_state.stage = None
             st.session_state.new_elements = []
@@ -111,8 +123,9 @@ if st.session_state.rec_queue or st.session_state.stage:
             for el in st.session_state.new_elements:
                 prop = st.session_state.get(f"theme_{el}", "")
                 st.session_state.schemas.append({"name": el, "property": prop})
-                if save:
-                    st.session_state.rec_queue.append(el)
+                st.session_state.rec_queue.append(el)
+            app_utils.save_list_of_schemas(app_utils.schemas_to_text(st.session_state.schemas))
+            app_utils.save_step7_queue(st.session_state.rec_queue)
             st.session_state.current = None
             st.session_state.stage = None
             st.session_state.new_elements = []
@@ -125,6 +138,7 @@ else:
     st.text_area("Resulting List of Schemas", schemas_display, height=160)
     if st.button("Save Result"):
         app_utils.save_list_of_schemas(schemas_display)
+        app_utils.save_step7_queue([])
         st.success("Schemas saved.")
 
 # ---------------------------------------------------------------------------
