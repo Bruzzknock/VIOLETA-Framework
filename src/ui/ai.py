@@ -540,9 +540,20 @@ def step7_mvp_ideas(bmt: str, medium: str, messages: List[Dict[str, str]]) -> st
 
 We are designing for {medium.lower()}. Break down each mechanic step by step.
 Encourage the user to identify concrete game elements, then ask how each one
-fits the theme and functions within the mechanics. Provide short suggestions
-using the format `Name: property` when requested.
+functions within the mechanics. Provide 3-5 short suggestions
+using the format `Name: Description`.
 
+<example>
+BMT Mechanic:
+Deck Building
+
+Suggestions:
+Engine Cards: Cards with abilities that synergize with other cards, allowing for powerful combinations and increased card draw or resource generation.
+Trash Pile: A designated area for removed cards. Players can move unwanted cards from their deck here to permanently remove them from the game.
+Supply Piles: Stacks of identical cards. Players can purchase or acquire cards from these piles to add to their deck.
+Victory Point Cards: Cards that, when acquired into a deck, contribute to a player's final score but often clog the deck during gameplay.
+etc...
+</example>
 Base Mechanics Tree:
 {bmt}
         """
