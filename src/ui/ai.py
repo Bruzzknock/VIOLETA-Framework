@@ -5,7 +5,11 @@ from typing import List, Dict
 
 from dotenv import load_dotenv
 from langchain_ollama import ChatOllama
-from langchain_google_genai import ChatGoogleGenerativeAI
+
+try:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+except Exception:  # Module may not be installed
+        ChatGoogleGenerativeAI = None
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 
@@ -16,6 +20,10 @@ def get_llm():
         """Return a chat model using Gemini if available, otherwise Ollama."""
         gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GEMINI_KEY")
         if gemini_key:
+                if ChatGoogleGenerativeAI is None:
+                        raise ImportError(
+                                "langchain_google_genai must be installed to use Gemini"
+                        )
                 return ChatGoogleGenerativeAI(
                         model="gemini-pro",
                         google_api_key=gemini_key,
