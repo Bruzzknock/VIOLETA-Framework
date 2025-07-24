@@ -569,3 +569,41 @@ Target Mechanic:
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
+
+
+def step7_theme_fit(
+    theme_vignette: str,
+    kernel_mappings,
+    parent: str,
+    element: str,
+    messages: List[Dict[str, str]],
+) -> str:
+    """Suggest how an element functions within the chosen theme."""
+
+    mapping_text = json.dumps(kernel_mappings, indent=2) if kernel_mappings else ""
+    system_prompt = f"""
+### STEP 7 – Theme-fit Check
+
+Theme vignette:
+{theme_vignette}
+
+Kernel to theme mappings:
+{mapping_text}
+
+Parent: {parent}
+Element: {element}
+
+Provide short suggestions on how this element could represent or operate within the theme. Use 2-4 concise bullet points or `Name: Explanation` style sentences.
+"""
+
+    model = get_llm()
+
+    lc_messages = [SystemMessage(content=system_prompt)]
+    for msg in messages:
+        if msg["role"] == "user":
+            lc_messages.append(HumanMessage(content=msg["content"]))
+        else:
+            lc_messages.append(AIMessage(content=msg["content"]))
+
+    response = model.invoke(lc_messages)
+    return remove_think_block(response.content)

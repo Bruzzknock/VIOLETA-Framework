@@ -20,3 +20,4 @@ linktr.ee/violeta.framework
 
 ## Step 7 Workflow
 During the "Theme" stage you can now click **Done** to store an element without adding it back into the queue for further breakdown.
+After an element is saved the chat is cleared so you can start a new conversation using the `step7_theme_fit` helper to explore how it works in your theme.
