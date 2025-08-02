@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import app_utils
+import ai
 
 st.header("Step 8B - Triadic Integration Table (TIT)")
 
@@ -35,16 +36,32 @@ rows = []
 for schema in schemas:
     row = {"Schema": schema}
     for sk in skills:
-        row[sk] = emotion_table.get(schema, {}).get(sk, False)
+        cell_val = emotion_table.get(schema, {}).get(sk, "")
+        if isinstance(cell_val, bool):
+            cell_val = "✔" if cell_val else ""
+        row[sk] = cell_val
     row["Result"] = emotion_table.get(schema, {}).get("Result", "")
     rows.append(row)
 
 df = pd.DataFrame(rows)
 
+if "tit_df" not in st.session_state:
+    st.session_state.tit_df = df
+
+def generate_suggestions():
+    with st.spinner("Generating suggestions..."):
+        for schema in schemas:
+            mask = st.session_state.tit_df["Schema"] == schema
+            for sk in skills:
+                suggestion = ai.step8b_cell(schema, sk, emotion)
+                st.session_state.tit_df.loc[mask, sk] = suggestion
+
+st.button("Suggest Explanations", on_click=generate_suggestions)
+
 with st.form("tit_form"):
-    config = {sk: st.column_config.CheckboxColumn() for sk in skills}
+    config = {sk: st.column_config.TextColumn() for sk in skills}
     edited = st.data_editor(
-        df,
+        st.session_state.tit_df,
         column_config=config,
         disabled=["Schema"],
         hide_index=True,
@@ -55,17 +72,18 @@ if submitted:
     result: dict[str, dict[str, object]] = {}
     for row in edited.to_dict(orient="records"):
         schema = row.get("Schema")
-        result[schema] = {sk: row.get(sk, False) for sk in skills}
+        result[schema] = {sk: row.get(sk, "") for sk in skills}
         result[schema]["Result"] = row.get("Result", "")
     existing_tit[emotion] = result
     app_utils.save_tit(existing_tit)
+    st.session_state.tit_df = edited
     st.success("TIT saved.")
 
 # Display current TIT as text for reference
 current = existing_tit.get(emotion, {})
 lines = []
 for schema, vals in current.items():
-    entries = [f"{sk}: {'✔' if vals.get(sk) else ''}" for sk in skills]
+    entries = [f"{sk}: {vals.get(sk, '')}" for sk in skills]
     entries.append(f"Result: {vals.get('Result', '')}")
     lines.append(f"{schema} | " + ", ".join(entries))
 
