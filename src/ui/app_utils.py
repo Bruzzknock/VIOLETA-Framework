@@ -506,14 +506,29 @@ def load_step7_queue() -> list:
 # Step 8: Scaling Influence Table helpers
 
 def _parse_sit(text: str) -> dict:
-    """Parse SIT text into a dict mapping skill -> [emotions]."""
+    """Parse SIT text into a dict mapping ``skill -> {emotion: '+'|'-'}``.
+
+    Accepts either JSON or a simple ``skill: emotion +/-`` line format.
+    Lines may contain multiple comma/semicolon separated pairs, e.g.::
+
+        Planning: Progress +, Constant Pressure -
+    """
+
     try:
         loaded = json.loads(text)
         if isinstance(loaded, dict):
-            return {str(k): list(v) for k, v in loaded.items()}
+            parsed: dict[str, dict[str, str]] = {}
+            for k, v in loaded.items():
+                if isinstance(v, dict):
+                    parsed[str(k)] = {str(ek): str(ev) for ek, ev in v.items()}
+                elif isinstance(v, list):
+                    # Backwards compatibility for old list-only format
+                    parsed[str(k)] = {str(ek): "+" for ek in v}
+            return parsed
     except Exception:
         pass
-    result: dict[str, list[str]] = {}
+
+    result: dict[str, dict[str, str]] = {}
     for line in text.splitlines():
         line = line.strip()
         if not line:
@@ -524,12 +539,34 @@ def _parse_sit(text: str) -> dict:
                 break
         else:
             continue
-        result[skill.strip()] = [e.strip() for e in re.split(r"[;,]", emos) if e.strip()]
+        emo_map: dict[str, str] = {}
+        for part in re.split(r"[;,]", emos):
+            part = part.strip()
+            if not part:
+                continue
+            tokens = part.split()
+            if len(tokens) == 2:
+                emo, mark = tokens
+            else:
+                emo, mark = tokens[0], "+"
+            emo_map[emo.strip()] = mark.strip()
+        result[skill.strip()] = emo_map
     return result
 
 
 def sit_to_text(table: dict) -> str:
-    return "\n".join(f"{k}: {', '.join(v)}" for k, v in table.items())
+    """Convert a SIT mapping to a human-readable string."""
+    lines: list[str] = []
+    for skill, emos in table.items():
+        if isinstance(emos, dict):
+            entries = [f"{e} {v}" for e, v in emos.items()]
+            lines.append(f"{skill}: {', '.join(entries)}")
+        elif isinstance(emos, list):
+            # Backwards compatibility for old list-only format
+            lines.append(f"{skill}: {', '.join(emos)}")
+        else:
+            lines.append(f"{skill}: {emos}")
+    return "\n".join(lines)
 
 
 def save_sit(table: str | dict) -> None:

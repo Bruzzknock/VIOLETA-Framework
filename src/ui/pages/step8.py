@@ -1,5 +1,5 @@
-import json
 import streamlit as st
+import pandas as pd
 import app_utils
 import ai
 
@@ -31,45 +31,46 @@ elif isinstance(feelings, list):
 elif feelings:
     emotions = [str(feelings)]
 
-# Load existing SIT
-def _ensure_dict(data):
-    if isinstance(data, dict):
-        return data
-    try:
-        return json.loads(data)
-    except Exception:
-        return {}
+existing = app_utils.load_sit()
+if not isinstance(existing, dict):
+    existing = {}
 
-existing = _ensure_dict(app_utils.load_sit())
+# Build DataFrame with '-' defaults
+df = pd.DataFrame('-', index=skills, columns=emotions)
+for skill, emos in existing.items():
+    if skill in df.index and isinstance(emos, dict):
+        for emo, mark in emos.items():
+            if emo in df.columns and mark in ['+', '-']:
+                df.loc[skill, emo] = mark
+    elif skill in df.index and isinstance(emos, list):
+        # Backwards compatibility for old list-only format
+        for emo in emos:
+            if emo in df.columns:
+                df.loc[skill, emo] = '+'
 
 with st.form("sit_form"):
-    st.write("Mark a '+' for each direct skill → emotion influence.")
-    selections = {}
-    for skill in skills:
-        cols = st.columns(len(emotions) + 1)
-        cols[0].markdown(f"**{skill}**")
-        for idx, emo in enumerate(emotions):
-            key = f"{skill}_{emo}"
-            checked = emo in existing.get(skill, [])
-            selections[key] = cols[idx + 1].checkbox("", value=checked, key=key)
+    st.write("Toggle '+' if a skill directly influences an emotion.")
+    editable = df.reset_index().rename(columns={'index': 'Atomic Unit Skill'})
+    config = {emo: st.column_config.SelectboxColumn(options=['+', '-']) for emo in emotions}
+    edited = st.data_editor(
+        editable,
+        column_config=config,
+        disabled=["Atomic Unit Skill"],
+        hide_index=True,
+    )
     submitted = st.form_submit_button("Save Table")
 
 if submitted:
-    result = {}
-    for skill in skills:
-        marked = []
-        for emo in emotions:
-            key = f"{skill}_{emo}"
-            if st.session_state.get(key):
-                marked.append(emo)
-        if marked:
-            result[skill] = marked
-    app_utils.save_sit(json.dumps(result))
+    result: dict[str, dict[str, str]] = {}
+    for row in edited.to_dict(orient="records"):
+        skill = row.get("Atomic Unit Skill")
+        result[skill] = {emo: row.get(emo, '-') for emo in emotions}
+    app_utils.save_sit(result)
     existing = result
     st.success("SIT saved.")
 
 sit_text = app_utils.sit_to_text(existing) if isinstance(existing, dict) else str(existing)
-st.text_area("Current SIT (Skill: emotion list)", sit_text, height=160)
+st.text_area("Current SIT (Skill: emotion +/-)", sit_text, height=160)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
