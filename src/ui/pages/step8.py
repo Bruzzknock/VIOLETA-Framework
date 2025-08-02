@@ -23,13 +23,19 @@ else:
 # Load top-level feelings (emotions)
 em_arc = app_utils.load_emotional_arc()
 feelings = em_arc.get("feelings", {}) if em_arc else {}
+emotion_descriptions: dict[str, str] = {}
 emotions: list[str] = []
 if isinstance(feelings, dict):
-    emotions = [str(v) for v in feelings.values()]
+    emotion_descriptions = {str(k): str(v) for k, v in feelings.items()}
+    emotions = list(emotion_descriptions.keys())
 elif isinstance(feelings, list):
     emotions = [str(v) for v in feelings]
 elif feelings:
     emotions = [str(feelings)]
+
+# Ensure every emotion has a description key
+for emo in emotions:
+    emotion_descriptions.setdefault(emo, "")
 
 existing = app_utils.load_sit()
 if not isinstance(existing, dict):
@@ -51,7 +57,13 @@ for skill, emos in existing.items():
 with st.form("sit_form"):
     st.write("Toggle '+' if a skill directly influences an emotion.")
     editable = df.reset_index().rename(columns={'index': 'Atomic Unit Skill'})
-    config = {emo: st.column_config.SelectboxColumn(options=['+', '-']) for emo in emotions}
+    config = {
+        emo: st.column_config.SelectboxColumn(
+            options=['+', '-'],
+            help=emotion_descriptions.get(emo, ""),
+        )
+        for emo in emotions
+    }
     edited = st.data_editor(
         editable,
         column_config=config,
