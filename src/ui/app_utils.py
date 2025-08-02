@@ -586,3 +586,90 @@ def load_sit():
         return json.loads(raw)
     except Exception:
         return raw
+
+
+# ---------------------------------------------------------------------------
+# Step 8B: Triadic Integration Table helpers
+
+
+def save_tit(table: str | dict) -> None:
+    """Persist the Triadic Integration Table."""
+
+    if isinstance(table, dict):
+        parsed = table
+    else:
+        try:
+            parsed = json.loads(table)
+        except Exception:
+            parsed = {}
+
+    data = _load_data()
+    data["tit_table"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_tit():
+    """Load the stored Triadic Integration Table."""
+
+    data = _load_data()
+    raw = data.get("tit_table", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
+def _find_subtree(tree: dict, target: str):
+    """Return the subtree rooted at ``target`` if present."""
+
+    if not isinstance(tree, dict):
+        return None
+    if target in tree:
+        return tree[target]
+    for _, val in tree.items():
+        if isinstance(val, dict):
+            found = _find_subtree(val, target)
+            if found is not None:
+                return found
+    return None
+
+
+def _collect_nodes(node: dict) -> list[str]:
+    """Collect all node names from a nested mapping."""
+
+    result: list[str] = []
+    if not isinstance(node, dict):
+        return result
+    for key, val in node.items():
+        result.append(key)
+        if isinstance(val, dict):
+            result.extend(_collect_nodes(val))
+    return result
+
+
+def get_schemas_for_emotion(emotion: str) -> list[str]:
+    """Return all mechanics and schemas linked to an emotion."""
+
+    mappings = load_mechanic_mappings()
+    if isinstance(mappings, dict):
+        mechanics = mappings.get(emotion, [])
+    else:
+        mechanics = []
+
+    bmt = load_base_mechanics_tree()
+    schemas: list[str] = []
+
+    for mech in mechanics:
+        schemas.append(mech)
+        subtree = _find_subtree(bmt, mech) if isinstance(bmt, dict) else None
+        if isinstance(subtree, dict):
+            schemas.extend(_collect_nodes(subtree))
+
+    # remove duplicates while preserving order
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for item in schemas:
+        if item not in seen:
+            seen.add(item)
+            ordered.append(item)
+    return ordered
