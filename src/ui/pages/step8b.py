@@ -45,7 +45,9 @@ for schema in schemas:
 
 df = pd.DataFrame(rows)
 
-if "tit_df" not in st.session_state:
+# Reset the table whenever a different emotion is selected
+if st.session_state.get("tit_emotion") != emotion:
+    st.session_state.tit_emotion = emotion
     st.session_state.tit_df = df
 
 def generate_suggestions():
