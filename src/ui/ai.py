@@ -639,19 +639,22 @@ Suggest which skills directly influence which emotions. Respond using the format
 
 def step8b_cell(schema: str, skill: str, emotion: str) -> str:
     """Explain how a schema can influence an atomic skill."""
+    system_prompt = (
+        "### STEP 8B – Triadic Integration Table\n\n"
+        "In one concise sentence, describe how the schema could influence or relate to the atomic skill in the game's context. "
+        "Return only the sentence."
+    )
 
-    system_prompt = f"""
-### STEP 8B – Triadic Integration Table
-
-Emotion: {emotion}
-Schema: {schema}
-Atomic skill: {skill}
-
-In one concise sentence, describe how the schema could influence or relate to the atomic skill in the game's context.
-Return only the sentence.
-"""
+    user_prompt = (
+        f"Emotion: {emotion}\n"
+        f"Schema: {schema}\n"
+        f"Atomic skill: {skill}"
+    )
 
     model = get_llm()
-    lc_messages = [SystemMessage(content=system_prompt)]
+    lc_messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=user_prompt),
+    ]
     response = model.invoke(lc_messages)
     return remove_think_block(response.content)
