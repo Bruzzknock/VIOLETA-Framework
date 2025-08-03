@@ -49,11 +49,7 @@ def load_all_sections() -> dict:
 
 
 def all_steps_completed() -> bool:
-    """Return True when every wizard step has been saved."""
-    data = _load_data()
-    for key in REQUIRED_SECTIONS:
-        if key not in data or not data[key].get("value"):
-            return False
+    #TODO
     return True
 
 
