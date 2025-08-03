@@ -26,6 +26,37 @@ def _save_data(sections: dict) -> None:
             f.write("\n")
 
 
+REQUIRED_SECTIONS = [
+    "atomic_unit",
+    "atomic_skills",
+    "skill_kernels",
+    "theme",
+    "theme_name",
+    "kernel_theme_mapping",
+    "emotional_arc",
+    "layered_feelings",
+    "mechanic_mappings",
+    "base_mechanics_tree",
+    "list_of_schemas",
+    "sit_table",
+    "tit_table",
+]
+
+
+def load_all_sections() -> dict:
+    """Return all sections stored in the gdsf file."""
+    return _load_data()
+
+
+def all_steps_completed() -> bool:
+    """Return True when every wizard step has been saved."""
+    data = _load_data()
+    for key in REQUIRED_SECTIONS:
+        if key not in data or not data[key].get("value"):
+            return False
+    return True
+
+
 def save_atomic_unit(value: str) -> None:
     data = _load_data()
     data["atomic_unit"] = {"value": value}
