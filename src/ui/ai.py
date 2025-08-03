@@ -661,3 +661,21 @@ def step8b_cell(kernel: str, mechanic: str, emotion: str) -> str:
     ]
     response = model.invoke(lc_messages)
     return remove_think_block(response.content)
+
+
+def generate_game_description(data: dict) -> str:
+    """Generate a high-level game description from gathered data."""
+    system_prompt = (
+        "You are a helpful assistant for the VIOLETA framework. "
+        "Using the provided structured data, craft a concise and "
+        "readable description of the envisioned game so that a reader can "
+        "easily visualize how the game works and what it teaches."
+    )
+    model = get_llm()
+    content = json.dumps(data, indent=2)
+    lc_messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=f"Game data:\n{content}"),
+    ]
+    response = model.invoke(lc_messages)
+    return remove_think_block(response.content)
