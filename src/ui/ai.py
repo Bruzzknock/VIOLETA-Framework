@@ -667,15 +667,37 @@ def generate_game_description(data: dict) -> str:
     """Generate a high-level game description from gathered data."""
     system_prompt = (
         "You are a helpful assistant for the VIOLETA framework. "
-        "Using the provided structured data, craft a concise and "
-        "readable description of the envisioned game so that a reader can "
-        "easily visualize how the game works and what it teaches."
+        "The user will supply structured JSON describing an educational game. "
+        "Interpret the fields as follows:\n"
+        "- atomic_unit: overarching subject to master.\n"
+        "- atomic_skills: list of core skills within that subject.\n"
+        "- skill_kernels: minimal kernel for each skill with input, verb, and output.\n"
+        "- theme: detailed narrative setting; theme_name: its short title.\n"
+        "- kernel_theme_mapping: how each kernel appears in the theme with specific inputs, verbs, and outputs.\n"
+        "- emotional_arc: vignette and mapping of feelings triggered by particular skills.\n"
+        "- layered_feelings: hierarchy showing how feelings build on one another.\n"
+        "- mechanic_mappings: which mechanics embody each feeling.\n"
+        "- base_mechanics_tree: root mechanics and their dependents.\n"
+        "- step7_queue: mechanics queued for further decomposition.\n"
+        "- list_of_schemas: descriptive properties for named mechanics.\n"
+        "- sit_table: Skill Impact Table (SIT) marking '+' or '-' for a skill's effect on a feeling.\n"
+        "- tit_table: Triadic Integration Table (TIT) linking skill–emotion pairs to the mechanics and feedback that teach them.\n"
+        "Using these elements, craft a concise, non-redundant description of the game. Follow this output structure without naming the sections:\n"
+        "1) Elevator Pitch (≤30 words) — theme_name plus a hook.\n"
+        "2) Learning Goal — 1-2 sentences summarising the atomic_unit in plain language.\n"
+        "3) How You'll Master It — bullet list: Skill → in-game action → immediate feedback.\n"
+        "4) Core Gameplay Loop — 2-3 sentences using mechanic_mappings and base_mechanics_tree to describe moment-to-moment play.\n"
+        "5) Emotional Journey — paragraph using emotional_arc and layered_feelings explaining why mechanics evoke the feelings.\n"
+        "6) Integration — explain how SIT/TIT and schemas keep learning, theme, and mechanics aligned.\n"
+        "7) Scenario Snapshot — a 40-word vignette of a tense decision.\n"
+        "Stylistic rules: 350-550 words total, second-person voice, active verbs, vivid sensory language, no technical jargon or raw JSON, mention each design artefact once.\n"
+        "Validation checklist: ensure every atomic_skill appears in section 3, no section labels leak except theme_name, word count within limits, and return only the finished description with no headings or meta-commentary."
     )
     model = get_llm()
     content = json.dumps(data, indent=2)
     lc_messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=f"Game data:\n{content}"),
+        HumanMessage(content=f"Structured game data:\n{content}"),
     ]
     response = model.invoke(lc_messages)
     return remove_think_block(response.content)
