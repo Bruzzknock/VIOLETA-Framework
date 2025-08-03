@@ -3,7 +3,7 @@ import pandas as pd
 import app_utils
 import ai
 
-st.header("Step 8B - Triadic Integration Table (TIT)")
+st.header("Step 8B - Triadic Integration Table – Kernel (TIT-K)")
 
 # Load SIT to find skill-emotion '+' pairs
 sit = app_utils.load_sit()
@@ -22,72 +22,85 @@ if not emotion_skills:
     st.stop()
 
 emotion = st.selectbox("Select Emotion", sorted(emotion_skills.keys()))
-skills = emotion_skills.get(emotion, [])
+skill = st.selectbox("Select Skill", sorted(emotion_skills.get(emotion, [])))
 
-schemas = app_utils.get_schemas_for_emotion(emotion)
+mechanics = app_utils.get_schemas_for_emotion(emotion)
+
+skill_kernels = app_utils.load_skill_kernels()
+kernel_list = skill_kernels.get(skill, []) if isinstance(skill_kernels, dict) else []
 
 existing_tit = app_utils.load_tit()
 if not isinstance(existing_tit, dict):
     existing_tit = {}
-emotion_table = existing_tit.get(emotion, {})
+skill_table = existing_tit.get(emotion, {}).get(skill, {})
 
 # Build initial DataFrame
+kernel_map: dict[str, str] = {}
 rows = []
-for schema in schemas:
-    row = {"Schema": schema}
-    for sk in skills:
-        cell_val = emotion_table.get(schema, {}).get(sk, "")
+for idx, kernel_info in enumerate(kernel_list, start=1):
+    kernel_text = kernel_info.get("kernel", "") if isinstance(kernel_info, dict) else str(kernel_info)
+    label = f"K_{idx} {kernel_text}"
+    kernel_map[label] = kernel_text
+    row = {"Kernel": label}
+    for mech in mechanics:
+        cell_val = skill_table.get(label, {}).get(mech, "")
         if isinstance(cell_val, bool):
             cell_val = "✔" if cell_val else ""
-        row[sk] = cell_val
-    row["Result"] = emotion_table.get(schema, {}).get("Result", "")
+        row[mech] = cell_val
+    row["Result"] = skill_table.get(label, {}).get("Result", "")
     rows.append(row)
 
 df = pd.DataFrame(rows)
 
-# Reset the table whenever a different emotion is selected
-if st.session_state.get("tit_emotion") != emotion:
+# Reset the table whenever a different emotion or skill is selected
+if (
+    st.session_state.get("tit_emotion") != emotion
+    or st.session_state.get("tit_skill") != skill
+):
     st.session_state.tit_emotion = emotion
+    st.session_state.tit_skill = skill
     st.session_state.tit_df = df
+
 
 def generate_suggestions():
     with st.spinner("Generating suggestions..."):
-        for schema in schemas:
-            mask = st.session_state.tit_df["Schema"] == schema
-            for sk in skills:
-                suggestion = ai.step8b_cell(schema, sk, emotion)
-                st.session_state.tit_df.loc[mask, sk] = suggestion
+        for label, kernel_text in kernel_map.items():
+            mask = st.session_state.tit_df["Kernel"] == label
+            for mech in mechanics:
+                suggestion = ai.step8b_cell(kernel_text, mech, emotion)
+                st.session_state.tit_df.loc[mask, mech] = suggestion
 
-st.button("Suggest Explanations", on_click=generate_suggestions)
+
+st.button("Evaluate Pairings", on_click=generate_suggestions)
 
 with st.form("tit_form"):
-    config = {sk: st.column_config.TextColumn() for sk in skills}
+    config = {mech: st.column_config.TextColumn() for mech in mechanics}
     edited = st.data_editor(
         st.session_state.tit_df,
         column_config=config,
-        disabled=["Schema"],
+        disabled=["Kernel"],
         hide_index=True,
     )
-    submitted = st.form_submit_button("Save TIT")
+    submitted = st.form_submit_button("Save TIT-K")
 
 if submitted:
     result: dict[str, dict[str, object]] = {}
     for row in edited.to_dict(orient="records"):
-        schema = row.get("Schema")
-        result[schema] = {sk: row.get(sk, "") for sk in skills}
-        result[schema]["Result"] = row.get("Result", "")
-    existing_tit[emotion] = result
+        label = row.get("Kernel")
+        result[label] = {mech: row.get(mech, "") for mech in mechanics}
+        result[label]["Result"] = row.get("Result", "")
+    existing_tit.setdefault(emotion, {})[skill] = result
     app_utils.save_tit(existing_tit)
     st.session_state.tit_df = edited
-    st.success("TIT saved.")
+    st.success("TIT-K saved.")
 
-# Display current TIT as text for reference
-current = existing_tit.get(emotion, {})
+# Display current TIT-K as text for reference
+current = existing_tit.get(emotion, {}).get(skill, {})
 lines = []
-for schema, vals in current.items():
-    entries = [f"{sk}: {vals.get(sk, '')}" for sk in skills]
+for label, vals in current.items():
+    entries = [f"{mech}: {vals.get(mech, '')}" for mech in mechanics]
     entries.append(f"Result: {vals.get('Result', '')}")
-    lines.append(f"{schema} | " + ", ".join(entries))
+    lines.append(f"{label} | " + ", ".join(entries))
 
 tit_text = "\n".join(lines)
-st.text_area("Current TIT", tit_text, height=200)
+st.text_area("Current TIT-K", tit_text, height=200)

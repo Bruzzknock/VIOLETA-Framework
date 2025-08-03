@@ -637,18 +637,21 @@ Suggest which skills directly influence which emotions. Respond using the format
     return remove_think_block(response.content)
 
 
-def step8b_cell(schema: str, skill: str, emotion: str) -> str:
-    """Explain how a schema can influence an atomic skill."""
+def step8b_cell(kernel: str, mechanic: str, emotion: str) -> str:
+    """Evaluate how a mechanic serves a kernel for a given emotion."""
     system_prompt = (
-        "### STEP 8B – Triadic Integration Table\n\n"
-        "In one concise sentence, describe how the schema could influence or relate to the atomic skill in the game's context. "
-        "Return only the sentence."
+        "### STEP 8B – Triadic Integration Table – Kernel\n\n"
+        "For the given kernel and mechanic, determine whether the mechanic can "
+        "express the real-life micro-action trained by the kernel within the "
+        "emotional context. Respond with one of: Accepted – <rationale>, "
+        "Revised – <rationale>, or Rejected – <rationale>. Return only a single "
+        "sentence."
     )
 
     user_prompt = (
         f"Emotion: {emotion}\n"
-        f"Schema: {schema}\n"
-        f"Atomic skill: {skill}"
+        f"Kernel: {kernel}\n"
+        f"Mechanic: {mechanic}"
     )
 
     model = get_llm()
