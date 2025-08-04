@@ -3,6 +3,11 @@ import app_utils
 import ai
 
 st.header("Step 1 - Atomic unit")
+st.info(
+    "Practical skills that require bodily control (e.g., horse riding or knife handling) "
+    "are not yet supported. These will be implemented in a future version, so please "
+    "avoid using them as atomic units."
+)
 
 with st.form("step1_form"):
     atomic_unit_input = st.text_input(
