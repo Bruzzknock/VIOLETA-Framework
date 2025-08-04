@@ -197,7 +197,7 @@ atomic skill: Modulo Division Hashing
 
 
 
-def step3a(atomic_skills, messages: List[Dict[str, str]]) -> str:
+def step3a_old(atomic_skills, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing a theme."""
         system_prompt = """
 ### STEP 3A \u2013 PICK A CANDIDATE THEME
@@ -209,11 +209,11 @@ atomic unit: Programming Syntax
 atomic skills: ["Data types", "Variables declaration and assignment", "Operators and their precedence", "Control flow (conditionals, loops)", "Functions definition and invocation", "Scope management", "Arrays and collections syntax", "Error handling", "String manipulation functions"]
 output:
 Fantasy Theme: Magic and Code
-In a realm where technology and magic intertwine, the world of Arcanecode is governed by the principles of programming and spellcasting. Wizards and sorcerers wielding arcane knowledge cast spells using intricate code syntax, 
-with data types representing different magical elements—fire, water, earth, and air. Variables declaration and assignment are essential for assigning magical energies or resources, while operators and precedence dictate the 
-order in which spells are combined. Control flow through conditionals and loops governs the decision-making processes of magic, such as casting protective shields until a specific condition is met. Functions definition and 
-invocation allow for reusable spells and magical constructs, while scope management limits the effect of spells to certain areas or durations. Error handling is crucial for addressing failed spells or unexpected magical reactions, 
-and string manipulation shapes and alters magical runes or incantations. In this world, the stakes are high—incorrect code can lead to disastrous consequences like spells backfiring or magical energy overflows. Being a skilled programmer 
+In a realm where technology and magic intertwine, the world of Arcanecode is governed by the principles of programming and spellcasting. Wizards and sorcerers wielding arcane knowledge cast spells using intricate code syntax,
+with data types representing different magical elements—fire, water, earth, and air. Variables declaration and assignment are essential for assigning magical energies or resources, while operators and precedence dictate the
+order in which spells are combined. Control flow through conditionals and loops governs the decision-making processes of magic, such as casting protective shields until a specific condition is met. Functions definition and
+invocation allow for reusable spells and magical constructs, while scope management limits the effect of spells to certain areas or durations. Error handling is crucial for addressing failed spells or unexpected magical reactions,
+and string manipulation shapes and alters magical runes or incantations. In this world, the stakes are high—incorrect code can lead to disastrous consequences like spells backfiring or magical energy overflows. Being a skilled programmer
 in Arcanecode is not just a talent; it is essential for survival and success in a realm where magic is powered by code.
 
 </example>
@@ -225,6 +225,42 @@ Our Atomic Skills: {atomic_skills}
         lc_messages = [SystemMessage(content=system_prompt)]
 
         lc_messages.append(HumanMessage(content=f"My atomic skills are: {atomic_skills}"))
+        for msg in messages:
+                if msg["role"] == "user":
+                        lc_messages.append(HumanMessage(content=msg["content"]))
+                else:
+                        lc_messages.append(AIMessage(content=msg["content"]))
+
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)
+
+
+def step3a(skill_kernels, messages: List[Dict[str, str]]) -> str:
+        """Generate a candidate theme based on kernels with learning types."""
+        skill_kernels_json = (
+                json.dumps(skill_kernels, indent=2)
+                if not isinstance(skill_kernels, str)
+                else skill_kernels
+        )
+        system_prompt = f"""
+### STEP 3A \u2013 PICK A CANDIDATE THEME
+You are a helpful assistant for the VIOLETA framework.
+Find a compelling world or situation where someone would need to use these kernels regularly.
+
+Kernels may be of three learning types:
+- **Declarative** – keep the kernel's input, verb, and output exactly the same within the theme.
+- **Procedural** or **Metacognitive** – adapt the input and output to fit the theme, but keep the verb unchanged.
+
+Return a short theme name followed by a two-sentence mood blurb describing the world's flavour, stakes, and common activities.
+
+Kernels with types:
+{skill_kernels_json}
+        """
+        model = get_llm()
+
+        lc_messages = [SystemMessage(content=system_prompt)]
+
+        lc_messages.append(HumanMessage(content=f"My kernels with types are: {skill_kernels_json}"))
         for msg in messages:
                 if msg["role"] == "user":
                         lc_messages.append(HumanMessage(content=msg["content"]))
@@ -378,7 +414,7 @@ def remove_code_fences(text: str) -> str:
 
 def step3(atomic_skills, skill_kernels, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response using Step 3A then Step 3B."""
-        theme = step3a(atomic_skills, messages)
+        theme = step3a(skill_kernels, messages)
         mapping = step3b(theme, skill_kernels)
         return f"{theme}\n\n{mapping}"
 
