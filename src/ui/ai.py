@@ -153,12 +153,24 @@ atomic skill: Modulo Division Hashing
                         result = []
                         for val in sk.values():
                                 if isinstance(val, list):
-                                        result.extend(val)
+                                        for item in val:
+                                                if isinstance(item, dict):
+                                                        result.append(item.get("name", ""))
+                                                else:
+                                                        result.append(item)
+                                elif isinstance(val, dict):
+                                        result.append(val.get("name", ""))
                                 else:
                                         result.append(val)
-                        return result
+                        return [s for s in result if s]
                 if isinstance(sk, list):
-                        return sk
+                        result = []
+                        for item in sk:
+                                if isinstance(item, dict):
+                                        result.append(item.get("name", ""))
+                                else:
+                                        result.append(item)
+                        return [s for s in result if s]
                 return [s.strip() for s in str(sk).splitlines() if s.strip()]
 
         skills = _flatten(atomic_skills)

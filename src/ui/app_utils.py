@@ -117,8 +117,38 @@ def _parse_atomic_skills(text: str):
     return skills
 
 
-def save_atomic_skills(skills: str) -> None:
-    parsed = _parse_atomic_skills(skills)
+def atomic_skills_to_text(skills) -> str:
+    """Convert stored atomic skills structure back to editable text."""
+    if isinstance(skills, dict):
+        lines: list[str] = []
+        for cat, items in skills.items():
+            lines.append(str(cat))
+            for item in items:
+                if isinstance(item, dict):
+                    lines.append(str(item.get("name", "")))
+                else:
+                    lines.append(str(item))
+            lines.append("")
+        return "\n".join(lines).strip()
+    if isinstance(skills, list):
+        lines = []
+        for item in skills:
+            if isinstance(item, dict):
+                lines.append(str(item.get("name", "")))
+            else:
+                lines.append(str(item))
+        return "\n".join(lines)
+    if isinstance(skills, str):
+        return skills
+    return ""
+
+
+def save_atomic_skills(skills) -> None:
+    """Save atomic skills which may already be parsed with types."""
+    if isinstance(skills, str):
+        parsed = _parse_atomic_skills(skills)
+    else:
+        parsed = skills
     data = _load_data()
     data["atomic_skills"] = {"value": json.dumps(parsed)}
     _save_data(data)
@@ -131,6 +161,34 @@ def load_atomic_skills():
         return json.loads(raw)
     except Exception:
         return raw
+
+
+def skill_names(skills) -> list[str]:
+    """Return a flat list of skill names from a saved skills structure."""
+    names: list[str] = []
+    if isinstance(skills, dict):
+        for val in skills.values():
+            if isinstance(val, list):
+                for item in val:
+                    if isinstance(item, dict):
+                        names.append(str(item.get("name", "")))
+                    else:
+                        names.append(str(item))
+            elif isinstance(val, dict):
+                names.append(str(val.get("name", "")))
+            else:
+                names.append(str(val))
+    elif isinstance(skills, list):
+        for item in skills:
+            if isinstance(item, dict):
+                names.append(str(item.get("name", "")))
+            else:
+                names.append(str(item))
+    elif isinstance(skills, str):
+        names = [line.strip() for line in skills.splitlines() if line.strip()]
+    elif skills:
+        names = [str(skills)]
+    return [n for n in names if n]
 
 
 def save_theme(theme: str) -> None:
