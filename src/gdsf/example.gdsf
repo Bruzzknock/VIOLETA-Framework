@@ -33,3 +33,9 @@ type = has_phase
 [meta]
 author = Kristijan
 version = 0.1
+
+[atomic_unit]
+value = "Cybersecurity"
+
+[atomic_skills]
+value = "{\"Technical Foundations\": [\"Basics of computer networks\", \"Understanding binary and hexadecimal\", \"Cryptography basics\"], \"Threats and Attacks\": [\"Common cyberattack vectors (phishing, DDoS)\", \"Social engineering principles\", \"Zero-day exploits\"], \"Defense Mechanisms\": [\"Firewalls and intrusion detection systems\", \"Implementing encryption protocols\", \"Setting up multi-factor authentication\"], \"Incident Handling\": [\"Identifying security breaches\", \"Containment and eradication techniques\", \"Reporting and documentation processes\"]}"

@@ -1,0 +1,8 @@
+streamlit
+streamlit-flow
+pandas
+pydantic
+plotly
+langchain
+langchain-ollama
+langchain-google-genai
