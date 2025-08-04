@@ -7,18 +7,7 @@ st.header("Step 8 - Scaling Influence Table (SIT)")
 
 # Load atomic-unit skills
 raw_skills = app_utils.load_atomic_skills()
-skills: list[str] = []
-if isinstance(raw_skills, dict):
-    for val in raw_skills.values():
-        if isinstance(val, list):
-            skills.extend(val)
-        else:
-            skills.append(str(val))
-elif isinstance(raw_skills, list):
-    skills = [str(s) for s in raw_skills]
-else:
-    if raw_skills:
-        skills = [str(raw_skills)]
+skills = app_utils.skill_names(raw_skills)
 
 # Load top-level feelings (emotions)
 em_arc = app_utils.load_emotional_arc()
