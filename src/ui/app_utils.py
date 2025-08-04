@@ -64,6 +64,21 @@ def load_atomic_unit() -> str:
     return data.get("atomic_unit", {}).get("value", "")
 
 
+def save_learning_types(types: list[str]) -> None:
+    data = _load_data()
+    data["learning_types"] = {"value": json.dumps(types)}
+    _save_data(data)
+
+
+def load_learning_types() -> list[str]:
+    data = _load_data()
+    raw = data.get("learning_types", {}).get("value", "[]")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return []
+
+
 def _parse_atomic_skills(text: str):
     """Parse user input for atomic skills.
 
