@@ -10,6 +10,28 @@ st.info(
 )
 
 with st.form("step1_form"):
+
+    st.subheader("Learning Types")
+    st.checkbox(
+        "Declarative (static) – facts, concepts, schemas",
+        disabled=True,
+        key="lt_declarative",
+    )
+    st.checkbox(
+        "Procedural (dynamic) – algorithms, skills, sequences",
+        disabled=True,
+        key="lt_procedural",
+    )
+    st.checkbox(
+        "Psychomotor – fine- and gross-motor execution",
+        disabled=True,
+        key="lt_psychomotor",
+    )
+    st.checkbox(
+        "Metacognitive / Conditional – when & why to deploy 1-3",
+        disabled=True,
+        key="lt_metacognitive",
+    )
     atomic_unit_input = st.text_input(
         "What is the atomic unit that the game should be based on?"
     )
