@@ -272,10 +272,42 @@ Kernels with types:
 
 
 def step3b(theme: str, skill_kernels) -> str:
-        """Generate a kernel mapping table for the chosen theme."""
+        """Generate a kernel mapping table for the chosen theme.
+
+        Only procedural and metacognitive kernels are adapted to the theme. Declarative
+        kernels are carried over from Step 2 without modification.
+        """
+
+        # Parse kernels and separate by learning type
+        if isinstance(skill_kernels, str):
+                try:
+                        kernels_data = json.loads(skill_kernels)
+                except Exception:
+                        kernels_data = {}
+        else:
+                kernels_data = skill_kernels
+
+        proc_meta: Dict[str, list] = {}
+        declaratives = []
+        for skill, kernels in kernels_data.items():
+                for kernel in kernels:
+                        ktype = str(kernel.get("type", "")).lower()
+                        if ktype in ("procedural", "metacognitive"):
+                                proc_meta.setdefault(skill, []).append(kernel)
+                        elif ktype == "declarative":
+                                declaratives.append(
+                                        {
+                                                "kernel": skill,
+                                                "input": kernel.get("input", ""),
+                                                "verb": kernel.get("verb", ""),
+                                                "output": kernel.get("output", ""),
+                                                "preserved": "Y",
+                                        }
+                                )
+
         system_prompt = """
 ### STEP 3B \u2013 KERNEL-BY-KERNEL MAPPING
-For each kernel from Step 2, specify an in-world element for the input, an action matching the kernel verb, and the resulting in-world element output. Mark the row with `Y` if the Input \u2192 Transformation \u2192 Output logic is preserved, otherwise `N`.
+For each **procedural** or **metacognitive** kernel from Step 2, specify an in-world element for the input, an action matching the kernel verb, and the resulting in-world element output. Mark the row with `Y` if the Input → Transformation → Output logic is preserved, otherwise `N`.
 The theme must cover every kernel. Revise the theme if any kernel cannot be mapped.
 
 Return the result as JSON.
@@ -320,14 +352,29 @@ output:
 }
 </example>
         """
-        model = get_llm()
 
-        lc_messages = [SystemMessage(content=system_prompt)]
-        lc_messages.append(HumanMessage(content=f"Theme: {theme}"))
-        lc_messages.append(HumanMessage(content=f"Kernels: {skill_kernels}"))
+        # If there are procedural/metacognitive kernels, ask the model to map them
+        mapped = {"theme": theme, "kernels": []}
+        if proc_meta:
+                model = get_llm()
+                lc_messages = [SystemMessage(content=system_prompt)]
+                lc_messages.append(HumanMessage(content=f"Theme: {theme}"))
+                lc_messages.append(
+                        HumanMessage(content=f"Kernels: {json.dumps(proc_meta, indent=2)}")
+                )
 
-        response = model.invoke(lc_messages)
-        return remove_think_block(response.content)
+                response = model.invoke(lc_messages)
+                content = remove_code_fences(remove_think_block(response.content))
+                try:
+                        mapped = json.loads(content)
+                except Exception:
+                        mapped = {"theme": theme, "kernels": []}
+
+        mapped_kernels = mapped.get("kernels", [])
+        mapped_kernels.extend(declaratives)
+        mapped["kernels"] = mapped_kernels
+        mapped.setdefault("theme", theme)
+        return json.dumps(mapped, indent=2)
 
 
 def step2(atomic_unit, messages: List[Dict[str, str]]) -> str:
