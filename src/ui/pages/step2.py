@@ -64,8 +64,13 @@ for skill, kernel_list in kernel_data.items():
         key = _kernel_key(skill, idx)
         current = kernel_info.get("type", "") if isinstance(kernel_info, dict) else ""
         sel_idx = learning_types.index(current) if current in learning_types else 0
+        color = "green" if isinstance(kernel_info, dict) and kernel_info.get("updated") else "inherit"
+        st.markdown(
+            f"<span style='color:{color}'>{kernel_sentence}</span>",
+            unsafe_allow_html=True,
+        )
         st.selectbox(
-            f"{kernel_sentence} learning type",
+            "Learning type",
             learning_types,
             index=sel_idx,
             key=key,
@@ -90,12 +95,57 @@ def save_kernels():
             lt = st.session_state.get(_kernel_key(skill, idx), "")
             if isinstance(kernel_info, dict):
                 kernel_info["type"] = lt
+                kernel_info.pop("updated", None)
             else:
                 kernel_list[idx] = {"kernel": str(kernel_info), "type": lt}
     app_utils.save_skill_kernels(json.dumps(data))
 
 
+def adapt_kernels():
+    try:
+        data = json.loads(st.session_state.kernels_text)
+    except Exception:
+        st.error("Kernels text is not valid JSON")
+        return
+    for skill, kernel_list in data.items():
+        for idx, kernel_info in enumerate(kernel_list):
+            lt = st.session_state.get(_kernel_key(skill, idx), "")
+            if isinstance(kernel_info, dict):
+                kernel_info["type"] = lt
+            else:
+                kernel_list[idx] = {"kernel": str(kernel_info), "type": lt}
+    with st.spinner("Updating kernels..."):
+        updated_json = ai.update_kernels(data)
+    try:
+        new_data = json.loads(updated_json)
+    except Exception:
+        st.error("LLM response was not valid JSON")
+        return
+    for skill, kernel_list in new_data.items():
+        old_list = data.get(skill, [])
+        for idx, kernel_info in enumerate(kernel_list):
+            old_kernel = ""
+            old_type = ""
+            if idx < len(old_list):
+                old_entry = old_list[idx]
+                if isinstance(old_entry, dict):
+                    old_kernel = old_entry.get("kernel", "")
+                    old_type = old_entry.get("type", "")
+            if isinstance(kernel_info, dict):
+                kernel_info.setdefault("type", old_type)
+                if kernel_info.get("kernel", "") != old_kernel:
+                    kernel_info["updated"] = True
+            else:
+                new_sentence = str(kernel_info)
+                changed = new_sentence != old_kernel
+                kernel_list[idx] = {"kernel": new_sentence, "type": old_type}
+                if changed:
+                    kernel_list[idx]["updated"] = True
+    st.session_state.kernels_text = json.dumps(new_data, indent=2)
+
+
 st.button("Generate Kernels", on_click=generate_kernels)
+st.button("Update Kernels", on_click=adapt_kernels)
 st.button("Save Kernels", on_click=save_kernels)
 
 if "messages" not in st.session_state:
