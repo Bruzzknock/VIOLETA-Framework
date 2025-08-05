@@ -295,15 +295,12 @@ def step3b(theme: str, skill_kernels) -> str:
                         if ktype in ("procedural", "metacognitive"):
                                 proc_meta.setdefault(skill, []).append(kernel)
                         elif ktype == "declarative":
-                                declaratives.append(
-                                        {
-                                                "kernel": skill,
-                                                "input": kernel.get("input", ""),
-                                                "verb": kernel.get("verb", ""),
-                                                "output": kernel.get("output", ""),
-                                                "preserved": "Y",
-                                        }
-                                )
+                                # Declarative kernels are not adapted to the theme.
+                                # Preserve the original kernel exactly as provided,
+                                # only marking that its logic remains intact.
+                                preserved_kernel = dict(kernel)
+                                preserved_kernel.setdefault("preserved", "Y")
+                                declaratives.append(preserved_kernel)
 
         system_prompt = """
 ### STEP 3B \u2013 KERNEL-BY-KERNEL MAPPING
