@@ -193,6 +193,43 @@ atomic skill: Modulo Division Hashing
         return json.dumps(results, indent=2)
 
 
+def kernels_to_update(skill_kernels) -> str:
+        """Determine which kernels should be updated based on their learning type."""
+
+        system_prompt = """
+You are a helpful assistant for the VIOLETA framework.
+Each kernel has a learning type: declarative, procedural, or metacognitive.
+Review the kernels and decide which ones do NOT match their learning type and
+should be rewritten.
+Return a JSON object mapping each skill name to a list of zero-based indices of
+kernels that need updating. Use an empty list for skills where all kernels are
+appropriate.
+"""
+
+        model = get_llm()
+        kernels_json = (
+                json.dumps(skill_kernels, indent=2)
+                if not isinstance(skill_kernels, str)
+                else skill_kernels
+        )
+        lc_messages = [SystemMessage(content=system_prompt)]
+        lc_messages.append(HumanMessage(content=f"Kernels: {kernels_json}"))
+
+        response = model.invoke(lc_messages)
+        cleaned = remove_think_block(response.content)
+        cleaned = remove_code_fences(cleaned)
+        try:
+                data = json.loads(cleaned)
+        except Exception:
+                data = {}
+        for key, val in list(data.items()):
+                if isinstance(val, int):
+                        data[key] = [val]
+                elif not isinstance(val, list):
+                        data[key] = []
+        return json.dumps(data, indent=2)
+
+
 def update_kernels(skill_kernels) -> str:
         """Adapt kernels so they align with their learning types."""
 

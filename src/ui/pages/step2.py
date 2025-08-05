@@ -114,34 +114,56 @@ def adapt_kernels():
                 kernel_info["type"] = lt
             else:
                 kernel_list[idx] = {"kernel": str(kernel_info), "type": lt}
+    with st.spinner("Checking kernels..."):
+        to_update_json = ai.kernels_to_update(data)
+    try:
+        to_update = json.loads(to_update_json)
+    except Exception:
+        st.error("LLM response was not valid JSON")
+        return
+    subset = {}
+    for skill, idx_list in to_update.items():
+        if skill in data:
+            selected = []
+            for idx in idx_list:
+                if isinstance(idx, int) and idx < len(data[skill]):
+                    selected.append(data[skill][idx])
+            if selected:
+                subset[skill] = selected
+    if not subset:
+        st.info("No kernels require updating.")
+        return
     with st.spinner("Updating kernels..."):
-        updated_json = ai.update_kernels(data)
+        updated_json = ai.update_kernels(subset)
     try:
         new_data = json.loads(updated_json)
     except Exception:
         st.error("LLM response was not valid JSON")
         return
-    for skill, kernel_list in new_data.items():
-        old_list = data.get(skill, [])
-        for idx, kernel_info in enumerate(kernel_list):
+    for skill, idx_list in to_update.items():
+        updated_list = new_data.get(skill, [])
+        for pos, idx in enumerate(idx_list):
+            if skill not in data or idx >= len(data[skill]):
+                continue
+            old_entry = data[skill][idx]
             old_kernel = ""
             old_type = ""
-            if idx < len(old_list):
-                old_entry = old_list[idx]
-                if isinstance(old_entry, dict):
-                    old_kernel = old_entry.get("kernel", "")
-                    old_type = old_entry.get("type", "")
-            if isinstance(kernel_info, dict):
-                kernel_info.setdefault("type", old_type)
-                if kernel_info.get("kernel", "") != old_kernel:
-                    kernel_info["updated"] = True
+            if isinstance(old_entry, dict):
+                old_kernel = old_entry.get("kernel", "")
+                old_type = old_entry.get("type", "")
+            updated_entry = updated_list[pos] if pos < len(updated_list) else old_entry
+            if isinstance(updated_entry, dict):
+                updated_entry.setdefault("type", old_type)
+                if updated_entry.get("kernel", "") != old_kernel:
+                    updated_entry["updated"] = True
             else:
-                new_sentence = str(kernel_info)
+                new_sentence = str(updated_entry)
                 changed = new_sentence != old_kernel
-                kernel_list[idx] = {"kernel": new_sentence, "type": old_type}
+                updated_entry = {"kernel": new_sentence, "type": old_type}
                 if changed:
-                    kernel_list[idx]["updated"] = True
-    st.session_state.kernels_text = json.dumps(new_data, indent=2)
+                    updated_entry["updated"] = True
+            data[skill][idx] = updated_entry
+    st.session_state.kernels_text = json.dumps(data, indent=2)
 
 
 st.button("Generate Kernels", on_click=generate_kernels)
