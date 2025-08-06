@@ -7,6 +7,9 @@ st.header("Step 2 - Atomic Skills & Kernels")
 
 atomic_unit = app_utils.load_atomic_unit()
 learning_types = app_utils.load_learning_types()
+loaded_skills = app_utils.load_atomic_skills()
+
+# Display selected learning types
 if learning_types:
     st.write("Learning Types: " + ", ".join(learning_types))
 
@@ -14,19 +17,36 @@ st.write(
     "What knowledge, actions, and/or skills are necessary to master this atomic unit?"
 )
 
-with st.form("step2_form"):
-    skill_inputs = {}
+# Ensure session state for skill inputs exists and is pre-populated
+if "skill_inputs" not in st.session_state:
+    st.session_state.skill_inputs = {}
+if isinstance(loaded_skills, dict):
     for lt in learning_types:
-        skill_inputs[lt] = st.text_area(
+        st.session_state.skill_inputs.setdefault(
+            lt, "\n".join(loaded_skills.get(lt, []))
+        )
+else:
+    for lt in learning_types:
+        st.session_state.skill_inputs.setdefault(lt, "")
+
+with st.form("step2_form"):
+    for lt in learning_types:
+        st.session_state.skill_inputs[lt] = st.text_area(
             f"{lt} Skills",
+            value=st.session_state.skill_inputs.get(lt, ""),
             height=120,
+            key=f"skill_{lt}",
         )
     submitted = st.form_submit_button("Next")
 
 if submitted:
     parsed = {
-        lt: [s.strip() for s in text.splitlines() if s.strip()]
-        for lt, text in skill_inputs.items()
+        lt: [
+            s.strip()
+            for s in st.session_state.skill_inputs.get(lt, "").splitlines()
+            if s.strip()
+        ]
+        for lt in learning_types
     }
     app_utils.save_atomic_skills(parsed)
 
@@ -71,3 +91,4 @@ if prompt:
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)
+
