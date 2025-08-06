@@ -10,17 +10,25 @@ learning_types = app_utils.load_learning_types()
 if learning_types:
     st.write("Learning Types: " + ", ".join(learning_types))
 
+st.write(
+    "What knowledge, actions, and/or skills are necessary to master this atomic unit?"
+)
+
 with st.form("step2_form"):
-    atomic_skills_input = st.text_area(
-        "What knowledge, actions, and/or skills are necessary to master this atomic unit?\n\n"
-        "You can group skills by entering a category name followed by its skills on separate lines.\n"
-        "Leave a blank line between categories.",
-        height=200,
-    )
+    skill_inputs = {}
+    for lt in learning_types:
+        skill_inputs[lt] = st.text_area(
+            f"{lt} Skills",
+            height=120,
+        )
     submitted = st.form_submit_button("Next")
 
 if submitted:
-    app_utils.save_atomic_skills(atomic_skills_input)
+    parsed = {
+        lt: [s.strip() for s in text.splitlines() if s.strip()]
+        for lt, text in skill_inputs.items()
+    }
+    app_utils.save_atomic_skills(parsed)
 
 st.subheader("Skill Kernels")
 
