@@ -25,9 +25,9 @@ with st.form("step1_form"):
         key="lt_procedural",
         value="Procedural" in saved_types,
     )
-    lt_psychomotor = st.checkbox(
+    st.checkbox(
         "Psychomotor – fine- and gross-motor execution",
-        key="lt_psychomotor",
+        disabled=True,
         value="Psychomotor" in saved_types,
     )
     lt_metacognitive = st.checkbox(
@@ -47,8 +47,6 @@ if submitted:
         selected_types.append("Declarative")
     if lt_procedural:
         selected_types.append("Procedural")
-    if lt_psychomotor:
-        selected_types.append("Psychomotor")
     if lt_metacognitive:
         selected_types.append("Metacognitive")
     app_utils.save_learning_types(selected_types)

@@ -288,7 +288,8 @@ def step2(atomic_unit, messages: List[Dict[str, str]]) -> str:
 ### STEP 2 · DECOMPOSE & TYPE-TAG THE ATOMIC SKILLS
 
 **Context**  
-An *atomic unit* is a tightly-coupled bundle of knowledge, behaviours, or skills that should be learned as one functional whole. Your job is to unpack it into the *atomic skills* a learner must master, then label each skill with exactly one learning-type tag drawn from {learning_types}.
+An *atomic unit* is a tightly-coupled bundle of knowledge, behaviours, or skills that should be learned as one functional whole. Your job is to unpack it into the *atomic skills* a learner must master, 
+then label each skill with exactly one learning-type tag drawn from {learning_types}.
 
 **Learning-type tags**  
 - **Declarative (D)**  — Knowing *what*: facts, terminology, conceptual relationships.  
