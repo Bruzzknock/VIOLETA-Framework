@@ -67,84 +67,91 @@ the designer’s educational goals, target audience, and contextual constraints.
 
 
 def step2_kernels(atomic_unit: str, atomic_skills) -> str:
-        """Generate kernel sentences for each atomic skill recursively."""
+        """Generate kernel sentences for each atomic skill by learning type."""
 
-        system_prompt = (
-                """
-                You are a helpful assistant for the VIOLETA framework.
-Given an atomic skills, create a one-sentence kernel for each
-skill. A kernel follows the pattern: Input -> Transformation -> Output and
-uses active verbs and plain language. Use one active verb only per sentence.
-If a skill needs more than one verb, split it into multiple kernels.
+        prompts = {
+                "Declarative": (
+                        """
+You are a helpful assistant for the VIOLETA framework.
+Given a declarative atomic skill, create a one-sentence kernel for the skill.
+Express the fact in passive voice and treat the mental act as the transformation.
+Use one passive verb phrase only (e.g. "are classified as").
+Keep the Input -> Transformation -> Output mapping explicit in the JSON fields.
 Return the kernels as a JSON object mapping each skill to its kernel sentence.
 
-Examples:
+Example:
+<example>
+atomic unit: Biology
+atomic skill: Cell classification
+output:
+{
+  "Cell classification": [
+    {
+      "kernel": "Cells are classified as eukaryotic or prokaryotic by nucleus presence.",
+      "input": "cells",
+      "verb": "are classified as",
+      "output": "eukaryotic or prokaryotic by nucleus presence",
+    }
+  ]
+}
+</example>
+                        """
+                ),
+                "Procedural": (
+                        """
+You are a helpful assistant for the VIOLETA framework.
+Given a procedural atomic skill, create a one-sentence kernel for the skill.
+Express the action in active voice, present tense.
+Use exactly one imperative or present-simple verb that a learner would perform.
+Keep the Input -> Transformation -> Output mapping explicit in the JSON fields.
+Return the kernels as a JSON object mapping each skill to its kernel sentence.
+
+Example:
 <example>
 atomic unit: Cryptography
 atomic skill: Encryption
 output:
-{{
+{
   "Encryption": [
-    {{
-      "kernel":"Transform readable data into unreadable data with a reversible rule.",
+    {
+      "kernel": "Transform readable data into unreadable data with a reversible rule.",
       "input": "readable data",
       "verb": "transform into",
-      "output": "unreadable data with a reversible rule"
-    }}
+      "output": "unreadable data with a reversible rule",
+    }
   ]
-}}
+}
 </example>
+                        """
+                ),
+                "Metacognitive": (
+                        """
+You are a helpful assistant for the VIOLETA framework.
+Given a metacognitive atomic skill, create a one-sentence kernel for the skill.
+Express the reflective act in active voice, present tense.
+Use exactly one cognitive verb (e.g., plan, monitor, decide, evaluate, prioritise, adjust) about self-regulation or strategy.
+Keep the Input -> Transformation -> Output mapping explicit in the JSON fields.
+Return the kernels as a JSON object mapping each skill to its kernel sentence.
 
+Example:
 <example>
-atomic unit: Cryptography
-atomic skill: Hashing
+atomic unit: Problem Solving
+atomic skill: Solution evaluation
 output:
-{{
-  "Hashing": [
-    {{
-      "kernel": "Condense variable-length data into a fixed-length fingerprint.",
-      "input": "variable-length data",
-      "verb": "condense into",
-      "output": "fixed-length fingerprint"
-    }}
+{
+  "Solution evaluation": [
+    {
+      "kernel": "Evaluate candidate solutions against criteria to select the best option.",
+      "input": "candidate solutions",
+      "verb": "evaluate",
+      "output": "best option",
+    }
   ]
-}}
+}
 </example>
-
-<example>
-atomic unit: Cryptography
-atomic skill: Modulo Division Hashing
-{{
-  "Modulo Division Hashing": [
-    {{
-      "kernel": "Divide the key by the table size to obtain its remainder index.",
-      "input": "key and table size",
-      "verb": "divide by",
-      "output": "remainder index"
-    }},
-    {{
-      "kernel": "Add the modulus to a negative key to obtain a positive remainder.",
-      "input": "negative key and modulus",
-      "verb": "add to",
-      "output": "positive remainder"
-    }},
-    {{
-      "kernel": "Link colliding keys into a chain to keep every entry reachable.",
-      "input": "colliding keys at same index",
-      "verb": "link into",
-      "output": "chain with reachable entries"
-    }},
-    {{
-      "kernel": "Divide the number of stored entries by the table size to calculate the load factor.",
-      "input": "number of entries and table size",
-      "verb": "divide by",
-      "output": "load factor"
-    }}
-  ]
-}}
-</example>
-                """
-        )
+                        """
+                ),
+        }
 
         model = get_llm()
 
@@ -161,22 +168,28 @@ atomic skill: Modulo Division Hashing
                         return sk
                 return [s.strip() for s in str(sk).splitlines() if s.strip()]
 
-        skills = _flatten(atomic_skills)
+        if isinstance(atomic_skills, dict):
+                skills_by_type = {k: _flatten(v) for k, v in atomic_skills.items()}
+        else:
+                skills_by_type = {"Procedural": _flatten(atomic_skills)}
+
         results = {}
 
-        for skill in skills:
-                lc_messages = [SystemMessage(content=system_prompt)]
-                lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
-                lc_messages.append(HumanMessage(content=f"Atomic skill: {skill}"))
+        for lt, skills in skills_by_type.items():
+                prompt = prompts.get(lt, prompts["Procedural"])
+                for skill in skills:
+                        lc_messages = [SystemMessage(content=prompt)]
+                        lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
+                        lc_messages.append(HumanMessage(content=f"Atomic skill: {skill}"))
 
-                response = model.invoke(lc_messages)
-                cleaned = remove_think_block(response.content)
-                cleaned = remove_code_fences(cleaned)
-                try:
-                        data = json.loads(cleaned)
-                except Exception:
-                        data = {skill: cleaned}
-                results.update(data)
+                        response = model.invoke(lc_messages)
+                        cleaned = remove_think_block(response.content)
+                        cleaned = remove_code_fences(cleaned)
+                        try:
+                                data = json.loads(cleaned)
+                        except Exception:
+                                data = {skill: cleaned}
+                        results.update(data)
 
         return json.dumps(results, indent=2)
 
