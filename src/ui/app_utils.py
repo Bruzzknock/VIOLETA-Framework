@@ -123,8 +123,20 @@ def _parse_atomic_skills(text: str):
     return skills
 
 
-def save_atomic_skills(skills: str) -> None:
-    parsed = _parse_atomic_skills(skills)
+def save_atomic_skills(skills) -> None:
+    """Persist atomic skills to the gdsf file.
+
+    ``skills`` may be either a raw string entered by the user or a dictionary
+    mapping learning types to lists of skills. If a string is provided, the
+    existing ``_parse_atomic_skills`` helper is used for backwards
+    compatibility. Dictionaries are written as-is.
+    """
+
+    if isinstance(skills, str):
+        parsed = _parse_atomic_skills(skills)
+    else:
+        parsed = skills
+
     data = _load_data()
     data["atomic_skills"] = {"value": json.dumps(parsed)}
     _save_data(data)
