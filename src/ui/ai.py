@@ -285,57 +285,70 @@ output:
 def step2(atomic_unit, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing atomic skills."""
         system_prompt = """
-### STEP 2 · IDENTIFY THE ATOMIC SKILLS
+### STEP 2 · DECOMPOSE & TYPE-TAG THE ATOMIC SKILLS
 
-**Context**
-An *atomic unit* is a bundled set of real-world knowledge, behaviours, or skills that should be learned together as a cohesive whole. It is the educational “nucleus” of the game—what the game aims to teach or train, not as isolated trivia but as a functional, applicable cluster of competencies.  
-Atomic units can range from a narrow soft skill (e.g. assertive communication) to an entire interdisciplinary domain (e.g. systems thinking). The choice depends on educational goals, target audience, and design constraints.
+**Context**  
+An *atomic unit* is a tightly-coupled bundle of knowledge, behaviours, or skills that should be learned as one functional whole. Your job is to unpack it into the *atomic skills* a learner must master, then label each skill with exactly one learning-type tag drawn from {learning_types}.
 
-**Task for the AI**
-Break the atomic unit into the smallest set of **atomic skills** that must be mastered to achieve functional competence.
+**Learning-type tags**  
+- **Declarative (D)**  — Knowing *what*: facts, terminology, conceptual relationships.  
+- **Procedural (P)**  — Knowing *how*: sequences, operations, motor or cognitive routines.  
+- **Metacognitive (M)** — Knowing *why/when*: monitoring, planning, and regulating one’s own performance.
 
-**When to STOP decomposing**
-* If the atomic unit/skill is already a single, self-contained skill or behaviour (e.g. *Encryption*), return **that one skill only**.
-* Otherwise, list each atomic skill separately.  
-  *Categories are optional*—use them only when they add clarity.
+> *If a skill clearly spans two types, choose the tag that best represents what will be **practised during gameplay or assessment***.
 
-**Coherence check**
-Every atomic skill must directly support the atomic unit’s overarching goal; drop anything tangential.
+**Task for the AI**  
+1. Break **{atomic_unit}** into its minimal set of atomic skills.  
+2. Assign exactly one tag (D, P, or M) to every skill.
 
-**Required output format**
-atomic unit: <name>
-atomic skills:
-– <skill 1>
-– <skill 2>
-…
+**When to STOP decomposing**  
+- If the atomic unit is already a single, self-contained skill or behaviour, return **that one skill only**.  
+- Otherwise, list each atomic skill on its own line—no sub-skills or sub-bullets.
 
-Examples:
-<example>
-atomic unit: Foundational Personal Budgeting - The ability to build, execute, and iterate a month-to-month budget that keeps spending below income while funding short- and long-term goals.
-atomic skills:
-- Income recording
-- Expense tracking
-- Categorisation
-- Cash-flow snapshot
-- SMART goal setting
-- Prioritisation & trade-off analysis
-- Envelope / zero-based allocation
-- Real-time variance monitoring
-- Mid-cycle adjustment
-</example>
+**Coherence check**  
+Every atomic skill must directly support the atomic unit’s functional goal; discard anything tangential.
 
-<example>
-atomic unit: Cryptography
-atomic skills:
-- Encryption
-- Decryption
-- Hashing Algorithm, modulo division method
-</example>
+**Required output format**  
+atomic unit: {atomic_unit}
 
-**Note**
-These examples illustrate *one* valid decomposition. Adapt the granularity and wording to suit your pedagogical intent and audience context. Internal coherence and direct relevance to the atomic unit matter most.
+declarative skills (D):  
+– <skill 1>  
+– <skill 2>  
 
-Our atomic unit: {atomic_unit}
+procedural skills (P):  
+– <skill 3>  
+– <skill 4>  
+
+metacognitive skills (M):  
+– <skill 5>  
+– <skill 6>  
+
+*(If a list is empty, include the heading and write “– none” so no category is skipped.)*
+
+---
+
+#### Example
+
+atomic unit: Foundational Chess Competence—play a complete game under classical rules while making sound strategic decisions.
+
+declarative skills (D):  
+– Opening principles (control centre, develop pieces, king safety)  
+– Piece valuation (relative point values, material trade-offs)  
+– Basic tactical motifs vocabulary (fork, pin, skewer, discovered attack)  
+
+procedural skills (P):  
+– Legal piece movement & captures  
+– Castling and en-passant execution  
+– Using algebraic notation to record moves  
+
+metacognitive skills (M):  
+– Choosing *when* to transition from opening to middlegame  
+– Planning a move sequence based on long-term strategic goals  
+– Evaluating positions to decide *whether* to simplify into an endgame  
+
+---
+
+*(End of prompt)*
         """
         model = get_llm()
 
