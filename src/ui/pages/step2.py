@@ -6,6 +6,9 @@ import ai
 st.header("Step 2 - Atomic Skills & Kernels")
 
 atomic_unit = app_utils.load_atomic_unit()
+learning_types = app_utils.load_learning_types()
+if learning_types:
+    st.write("Learning Types: " + ", ".join(learning_types))
 
 with st.form("step2_form"):
     atomic_skills_input = st.text_area(

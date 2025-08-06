@@ -32,6 +32,7 @@ REQUIRED_SECTIONS = [
     "skill_kernels",
     "theme",
     "theme_name",
+    "learning_types",
     "kernel_theme_mapping",
     "emotional_arc",
     "layered_feelings",
@@ -62,6 +63,26 @@ def save_atomic_unit(value: str) -> None:
 def load_atomic_unit() -> str:
     data = _load_data()
     return data.get("atomic_unit", {}).get("value", "")
+
+
+def save_learning_types(types: list[str]) -> None:
+    """Persist selected learning types to the gdsf file."""
+    data = _load_data()
+    data["learning_types"] = {"value": json.dumps(types)}
+    _save_data(data)
+
+
+def load_learning_types() -> list[str]:
+    """Return the learning types stored in the gdsf file."""
+    data = _load_data()
+    raw = data.get("learning_types", {}).get("value", "[]")
+    try:
+        loaded = json.loads(raw)
+        if isinstance(loaded, list):
+            return loaded
+        return [str(loaded)]
+    except Exception:
+        return []
 
 
 def _parse_atomic_skills(text: str):
