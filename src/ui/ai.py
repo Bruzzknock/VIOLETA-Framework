@@ -385,7 +385,7 @@ output:
 
 
 
-def step3a(atomic_skills, kernels_with_benefits, messages: List[Dict[str, str]]) -> str:
+def step3a_old(atomic_skills, kernels_with_benefits, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing a theme."""
         system_prompt = """
 ### STEP 3A – PICK A CANDIDATE THEME
@@ -438,6 +438,28 @@ Our Kernels with Benefits: {kernels_with_benefits}
                         lc_messages.append(HumanMessage(content=msg["content"]))
                 else:
                         lc_messages.append(AIMessage(content=msg["content"]))
+
+        response = model.invoke(lc_messages)
+        return remove_think_block(response.content)
+
+
+def step3a(kernel: dict) -> str:
+        """Find an analogy for a kernel while preserving its benefits."""
+        system_prompt = """
+### STEP 3A – ANALOGY FOR EACH KERNEL
+Given a kernel and its benefits, produce a concise analogy that teaches the kernel
+and upholds why the kernel matters.
+
+Return the analogy as a short paragraph.
+        """
+        model = get_llm()
+        kernel_text = kernel.get("kernel")
+        benefits = kernel.get("why_it_matters") or []
+
+        lc_messages = [SystemMessage(content=system_prompt)]
+        lc_messages.append(HumanMessage(content=f"Kernel: {kernel_text}"))
+        if benefits:
+                lc_messages.append(HumanMessage(content=f"Benefits: {benefits}"))
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
@@ -601,10 +623,25 @@ def remove_code_fences(text: str) -> str:
 def step3(
         atomic_skills, skill_kernels, kernels_with_benefits, messages: List[Dict[str, str]]
 ) -> str:
-        """Return a chat-based response using Step 3A then Step 3B."""
-        theme = step3a(atomic_skills, kernels_with_benefits, messages)
-        mapping = step3b(theme, skill_kernels)
-        return f"{theme}\n\n{mapping}"
+        """Generate analogies for each kernel and return them grouped by skill."""
+
+        analogies: dict = {}
+        if isinstance(kernels_with_benefits, dict):
+                for skill, kern_list in kernels_with_benefits.items():
+                        results = []
+                        if isinstance(kern_list, list):
+                                for kern in kern_list:
+                                        try:
+                                                analogy = step3a(kern)
+                                                results.append({
+                                                        "kernel": kern.get("kernel"),
+                                                        "analogy": analogy,
+                                                })
+                                        except Exception:
+                                                continue
+                        analogies[skill] = results
+
+        return json.dumps(analogies, indent=2)
 
 def step3_mapping(theme: str, skill_kernels) -> str:
         """Backward compatible wrapper for step3b."""
