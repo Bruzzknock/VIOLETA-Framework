@@ -73,11 +73,25 @@ def step2_kernels(atomic_unit: str, atomic_skills) -> str:
                 "Declarative": (
                         """
 You are a helpful assistant for the VIOLETA framework.
+
 Given a declarative atomic skill, create one or more one-sentence kernels for the skill.
-Express the fact as a short, active and casual fact style.
-Use one passive verb phrase only (e.g. "are classified as").
-Keep the Input -> Transformation -> Output mapping explicit in the JSON fields.
-Return the kernels as a JSON object mapping each skill to its kernel sentence.
+
+Each kernel must:
+• Follow the Input → Transformation → Output mapping explicitly.
+• Express a causal or functional fact that supports real-world mastery of the skill.
+• Use one active verb (or one passive verb phrase if unavoidable, e.g., "are classified as").
+• Avoid purely descriptive, aesthetic, or sensory traits (e.g., "crisp texture," "bright color") unless directly linked to a functional property relevant to the skill.
+• Be concrete and teach something actionable or scientifically relevant.
+• Avoid subjective judgments or opinions.
+
+Return the kernels as a JSON object mapping each skill to its kernel sentence, with explicit 'input', 'verb', and 'output' fields.
+
+Before finalizing, run a "Quality Gate":
+1. Does the kernel directly advance mastery of the atomic skill?
+2. Does it show a clear cause-and-effect relationship?
+3. Could it be mapped to a game mechanic where success requires applying this fact?
+
+If any answer is "no," discard or rewrite the kernel.
 
 Examples:
 <example>
@@ -128,45 +142,61 @@ output:
                 "Procedural": (
                         """
 You are a helpful assistant for the VIOLETA framework.
-Given a procedural atomic skill, create one or more one-sentence kernels for the skill.
-Express the action in active voice, present tense.
-Use exactly one imperative or present-simple verb that a learner would perform.
-Keep the Input -> Transformation -> Output mapping explicit in the JSON fields.
-Return the kernels as a JSON object mapping each skill to its kernel sentence.
 
-Example:
+Given a procedural atomic skill, create one or more one-sentence kernels for the skill.
+
+Each kernel must:
+• Be in active voice, present tense.
+• Contain exactly one imperative or present-simple verb that a learner would physically or mentally perform.
+• Clearly follow the Input → Transformation → Output mapping in the JSON fields.
+• Describe an action that advances mastery of the skill in a real-world context.
+• Avoid filler actions or decorative phrasing (e.g., “prepare nicely,” “carefully handle”) unless the adverb specifies a measurable outcome.
+• Avoid subjective judgments or aesthetic results unless they have functional significance.
+• Make the output tangible or verifiable (size, form, state, structure, readiness).
+
+**Quality Gate before finalizing:**
+1. Does the action directly contribute to mastering the atomic skill?
+2. Is there a clear transformation from the input state to the output state?
+3. Could the step be mapped to a concrete in-game mechanic that requires correct execution?
+
+If any answer is “no,” discard or rewrite the kernel.
+
+Return the kernels as a JSON object mapping each skill to its kernel sentence, with explicit 'input', 'verb', and 'output' fields.
+
+
+Examples:
 <example>
-atomic unit: Cryptography
-atomic skill: Encryption
+atomic unit: Digital Photography
+atomic skill: Adjust camera exposure
 output:
 {
-  "Encryption": [
+  "Adjust camera exposure": [
     {
-      "kernel": "Transform readable data into unreadable data with a reversible rule.",
-      "input": "readable data",
-      "verb": "transform into",
-      "output": "unreadable data with a reversible rule"
+      "kernel": "Increase shutter speed to reduce motion blur in bright light.",
+      "input": "shutter speed",
+      "verb": "increase",
+      "output": "reduced motion blur in bright light"
+    },
+    {
+      "kernel": "Decrease aperture size to increase depth of field.",
+      "input": "aperture size",
+      "verb": "decrease",
+      "output": "increased depth of field"
     }
   ]
 }
 </example>
 <example>
-atomic unit: Knife Skills
-atomic skill: Slice and dice vegetables
+atomic unit: Data Analysis
+atomic skill: Sort dataset by value
 output:
 {
-  "Slice and dice vegetables": [
+  "Sort dataset by value": [
     {
-      "kernel": "Slice whole vegetables into uniform strips.",
-      "input": "whole vegetables",
-      "verb": "slice",
-      "output": "uniform strips"
-    },
-    {
-      "kernel": "Dice vegetable strips into small cubes.",
-      "input": "vegetable strips",
-      "verb": "dice",
-      "output": "small cubes"
+      "kernel": "Arrange data rows in ascending order by numeric value.",
+      "input": "data rows",
+      "verb": "arrange",
+      "output": "ascending order by numeric value"
     }
   ]
 }
@@ -176,45 +206,65 @@ output:
                 "Metacognitive": (
                         """
 You are a helpful assistant for the VIOLETA framework.
-Given a metacognitive atomic skill, create one or more one-sentence kernels for the skill.
-Express the reflective act in active voice, present tense.
-Use exactly one cognitive verb (e.g., plan, monitor, decide, evaluate, prioritise, adjust) about self-regulation or strategy.
-Keep the Input -> Transformation -> Output mapping explicit in the JSON fields.
-Return the kernels as a JSON object mapping each skill to its kernel sentence.
 
-Example:
+Given a metacognitive atomic skill, create one or more one-sentence kernels for the skill.
+
+Each kernel must:
+• Be in active voice, present tense.
+• Contain exactly one cognitive verb about self-regulation, strategic thinking, or reflective adjustment (e.g., plan, monitor, decide, evaluate, prioritise, adjust, reflect).
+• Explicitly follow the Input → Transformation → Output mapping in the JSON fields.
+• Describe a mental process that advances mastery of the atomic skill in a real-world context.
+• Avoid vague introspection without actionable outcomes (e.g., “think about the task”).
+• Make the output tangible or verifiable (e.g., improved plan, detected issue, revised approach).
+
+**Quality Gate before finalizing:**
+1. Does the cognitive act directly contribute to mastering the atomic skill?
+2. Is there a clear transformation from the input state to the output state?
+3. Could the mental step be mapped to a concrete in-game mechanic where success requires applying this reflective act?
+
+If any answer is “no,” discard or rewrite the kernel.
+
+Return the kernels as a JSON object mapping each skill to its kernel sentence, with explicit 'input', 'verb', and 'output' fields.
+
+Examples:
 <example>
-atomic unit: Problem Solving
-atomic skill: Solution evaluation
+atomic unit: Project Management
+atomic skill: Risk assessment
 output:
 {
-  "Solution evaluation": [
+  "Risk assessment": [
     {
-      "kernel": "Evaluate candidate solutions against criteria to select the best option.",
-      "input": "candidate solutions",
+      "kernel": "Evaluate project milestones to identify risks before they escalate.",
+      "input": "project milestones",
       "verb": "evaluate",
-      "output": "best option"
+      "output": "identified risks before escalation"
+    },
+    {
+      "kernel": "Adjust resource allocation to prevent delays in critical tasks.",
+      "input": "resource allocation",
+      "verb": "adjust",
+      "output": "prevention of delays in critical tasks"
     }
   ]
 }
 </example>
 <example>
-atomic unit: Study Self-Regulation
-atomic skill: Monitor and adjust study schedule
+atomic unit: Competitive Strategy
+atomic skill: Match strategy adaptation
 output:
 {
-  "Monitor and adjust study schedule": [
+  "Match strategy adaptation": [
     {
-      "kernel": "Monitor study progress to detect falling behind schedule.",
-      "input": "study progress",
+      "kernel": "Monitor opponent tactics to detect exploitable patterns.",
+      "input": "opponent tactics",
       "verb": "monitor",
-      "output": "detection of falling behind schedule"
+      "output": "detected exploitable patterns"
     },
     {
-      "kernel": "Adjust study sessions to realign with weekly goals.",
-      "input": "study sessions",
-      "verb": "adjust",
-      "output": "realignment with weekly goals"
+      "kernel": "Revise team formation to counter emerging threats.",
+      "input": "team formation",
+      "verb": "revise",
+      "output": "counter to emerging threats"
     }
   ]
 }
