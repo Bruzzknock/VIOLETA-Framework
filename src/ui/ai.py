@@ -187,8 +187,18 @@ output:
                         cleaned = remove_code_fences(cleaned)
                         try:
                                 data = json.loads(cleaned)
+                                for k, kernels in list(data.items()):
+                                        if isinstance(kernels, list):
+                                                for kernel in kernels:
+                                                        if isinstance(kernel, dict):
+                                                                kernel["learning_type"] = lt
+                                        elif isinstance(kernels, dict):
+                                                kernels["learning_type"] = lt
+                                                data[k] = [kernels]
+                                        else:
+                                                data[k] = [{"kernel": kernels, "learning_type": lt}]
                         except Exception:
-                                data = {skill: cleaned}
+                                data = {skill: [{"kernel": cleaned, "learning_type": lt}]}
                         results.update(data)
 
         return json.dumps(results, indent=2)
