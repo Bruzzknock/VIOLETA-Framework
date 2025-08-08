@@ -481,12 +481,9 @@ Analogy 2: [Your analogy header]
 <example>
 Kernel: Record all categorized expenses in a financial tracking system.
 Benefits:
-
-Enables accurate tracking of spending habits and identification of areas for savings.
-
-Provides essential data for creating realistic budgets and achieving financial goals.
-
-Facilitates quick detection of financial discrepancies or potential fraud.
+- Enables accurate tracking of spending habits and identification of areas for savings.
+- Provides essential data for creating realistic budgets and achieving financial goals.
+- Facilitates quick detection of financial discrepancies or potential fraud.
 
 Analogy 1: Curating the Memories in a Time Traveler’s Archive
 A time traveler maintains an intricate archive of every moment they’ve visited — each memory stored in a crystal labeled by era, location, 
