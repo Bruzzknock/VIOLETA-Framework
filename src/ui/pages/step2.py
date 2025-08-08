@@ -77,6 +77,79 @@ st.button("Generate Kernels", on_click=generate_kernels)
 if st.button("Save Kernels"):
     app_utils.save_skill_kernels(st.session_state.kernels_text)
 
+st.subheader("Why It Matters")
+
+skill_kernels = app_utils.load_skill_kernels()
+benefits = app_utils.load_kernel_benefits() or {}
+benefit_mappings = app_utils.load_kernel_benefit_mappings() or []
+
+all_kernels: list[dict] = []
+if isinstance(skill_kernels, dict):
+    for kern_list in skill_kernels.values():
+        if isinstance(kern_list, list):
+            all_kernels.extend(kern_list)
+
+for idx, kernel in enumerate(all_kernels, start=1):
+    if isinstance(kernel, dict):
+        kernel.setdefault("id", f"k{idx}")
+        if "fact" not in kernel and "kernel" in kernel:
+            kernel["fact"] = kernel["kernel"]
+
+benefit_options = list(benefits.values())
+
+if "benefit_inputs" not in st.session_state:
+    st.session_state.benefit_inputs = {}
+    for kernel in all_kernels:
+        existing = [
+            benefits[m["benefit_id"]]
+            for m in benefit_mappings
+            if m.get("kernel_id") == kernel.get("id") and m.get("benefit_id") in benefits
+        ]
+        st.session_state.benefit_inputs[kernel["id"]] = {
+            "selected": existing,
+            "new": "",
+        }
+
+for kernel in all_kernels:
+    st.markdown(f"**{kernel.get('kernel', '')}**")
+    st.session_state.benefit_inputs[kernel["id"]]["selected"] = st.multiselect(
+        "Select existing benefits",
+        benefit_options,
+        default=st.session_state.benefit_inputs[kernel["id"]]["selected"],
+        key=f"select_{kernel['id']}",
+    )
+    st.session_state.benefit_inputs[kernel["id"]]["new"] = st.text_area(
+        "Add new benefits (one per line, optional '||' for copy override)",
+        value=st.session_state.benefit_inputs[kernel["id"]]["new"],
+        key=f"new_{kernel['id']}",
+        height=80,
+    )
+    st.write("---")
+
+if st.button("Save Why It Matters"):
+    benefits_dict = dict(benefits)
+    mappings = []
+    for kernel in all_kernels:
+        selected = st.session_state.benefit_inputs[kernel["id"]]["selected"]
+        new_lines = st.session_state.benefit_inputs[kernel["id"]]["new"].splitlines()
+        texts = selected + [l.strip() for l in new_lines if l.strip()]
+        for text in texts:
+            if "||" in text:
+                base, override = [p.strip() for p in text.split("||", 1)]
+            else:
+                base, override = text.strip(), None
+            benefit_id = next((bid for bid, val in benefits_dict.items() if val == base), None)
+            if benefit_id is None:
+                benefit_id = f"w{len(benefits_dict)+1}"
+                benefits_dict[benefit_id] = base
+            mapping = {"kernel_id": kernel["id"], "benefit_id": benefit_id}
+            if override:
+                mapping["copy_override"] = override
+            mappings.append(mapping)
+    app_utils.save_kernel_benefits(json.dumps(benefits_dict))
+    app_utils.save_kernel_benefit_mappings(json.dumps(mappings))
+
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 

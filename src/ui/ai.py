@@ -270,6 +270,17 @@ output:
                                 data = {skill: [{"kernel": cleaned, "learning_type": lt}]}
                         results.update(data)
 
+        # Ensure each kernel has a unique id and a "fact" alias of the kernel text
+        counter = 1
+        for kernels in results.values():
+                if isinstance(kernels, list):
+                        for kernel in kernels:
+                                if isinstance(kernel, dict):
+                                        kernel.setdefault("id", f"k{counter}")
+                                        if "fact" not in kernel and "kernel" in kernel:
+                                                kernel["fact"] = kernel["kernel"]
+                                        counter += 1
+
         return json.dumps(results, indent=2)
 
 
