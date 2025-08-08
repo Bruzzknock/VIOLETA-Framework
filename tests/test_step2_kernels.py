@@ -42,3 +42,21 @@ def test_step2_kernels_prompts(monkeypatch):
     assert "id" in data["Fact"][0]
     assert "kernel" in data["Fact"][0]
     assert "fact" not in data["Fact"][0]
+
+
+def test_step2_why_it_matters(monkeypatch):
+    recorded = {}
+
+    class FakeModel:
+        def invoke(self, messages):
+            recorded["messages"] = [m.content for m in messages]
+            return SimpleNamespace(content=json.dumps(["r1", "r2"]))
+
+    monkeypatch.setattr(ai, "get_llm", lambda: FakeModel())
+
+    kernel = {"kernel": "k", "input": "i", "verb": "v", "output": "o"}
+    reasons = ai.step2_why_it_matters("Unit", kernel)
+
+    assert reasons == ["r1", "r2"]
+    assert any("Atomic unit: Unit" == m for m in recorded["messages"])
+    assert any("Kernel:" in m for m in recorded["messages"])
