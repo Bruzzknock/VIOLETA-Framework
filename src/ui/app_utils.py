@@ -258,6 +258,26 @@ def load_kernel_benefit_mappings():
         return raw
 
 
+def save_kernel_analogies(analogies) -> None:
+    """Persist selected kernel analogies to the gdsf file."""
+    try:
+        parsed = json.loads(analogies)
+    except Exception:
+        parsed = analogies
+    data = _load_data()
+    data["kernel_analogies"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_kernel_analogies():
+    data = _load_data()
+    raw = data.get("kernel_analogies", {}).get("value", "{}")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
 # Functions for saving the kernel-theme mapping produced in Step 3B
 def save_kernel_theme_mapping(info: str) -> None:
     """Save Step 3B table to the gdsf file."""
