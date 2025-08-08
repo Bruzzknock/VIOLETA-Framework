@@ -74,55 +74,56 @@ def step2_kernels(atomic_unit: str, atomic_skills) -> str:
                         """
 You are a helpful assistant for the VIOLETA framework.
 Given a declarative atomic skill, create one or more one-sentence kernels for the skill.
-Express the fact in passive voice and treat the mental act as the transformation.
+Express the fact as a short, active and casual fact style.
 Use one passive verb phrase only (e.g. "are classified as").
 Keep the Input -> Transformation -> Output mapping explicit in the JSON fields.
 Return the kernels as a JSON object mapping each skill to its kernel sentence.
 
-Example:
+Examples:
 <example>
-atomic unit: Biology
-atomic skill: Cell classification
+atomic unit: Nutrition
+atomic skill: Protein sources
 output:
 {
-  "Cell classification": [
+  "Protein sources": [
     {
-      "kernel": "Cells are classified as eukaryotic or prokaryotic by nucleus presence.",
-      "input": "cells",
-      "verb": "are classified as",
-      "output": "eukaryotic or prokaryotic by nucleus presence",
+      "kernel": "Meat has protein, which builds muscle and aids recovery.",
+      "input": "meat",
+      "verb": "has",
+      "output": "protein, which builds muscle and aids recovery"
+    },
+    {
+      "kernel": "Eggs contain protein that supports tissue repair.",
+      "input": "eggs",
+      "verb": "contain",
+      "output": "protein that supports tissue repair"
     }
   ]
 }
 </example>
+
 <example>
-atomic unit: Culinary Basics
-atomic skill: Common cooking terms (sauté, simmer, blanch)
+atomic unit: Energy nutrients
+atomic skill: Carbohydrates
 output:
 {
-  "Common cooking terms (sauté, simmer, blanch)": [
+  "Carbohydrates": [
     {
-      "kernel": "Sauté is defined as quickly cooking food in a small amount of hot fat.",
-      "input": "sauté",
-      "verb": "is defined as",
-      "output": "quickly cooking food in a small amount of hot fat"
+      "kernel": "Bread provides quick energy for the body.",
+      "input": "bread",
+      "verb": "provides",
+      "output": "quick energy for the body"
     },
     {
-      "kernel": "Simmer is defined as gently cooking food in liquid held just below boiling.",
-      "input": "simmer",
-      "verb": "is defined as",
-      "output": "gently cooking food in liquid held just below boiling"
-    },
-    {
-      "kernel": "Blanch is defined as briefly boiling food and then cooling it rapidly to halt cooking.",
-      "input": "blanch",
-      "verb": "is defined as",
-      "output": "briefly boiling food and then cooling it rapidly to halt cooking"
+      "kernel": "Potatoes supply energy that fuels activity.",
+      "input": "potatoes",
+      "verb": "supply",
+      "output": "energy that fuels activity"
     }
   ]
 }
 </example>
-                        """
+        """
                 ),
                 "Procedural": (
                         """
