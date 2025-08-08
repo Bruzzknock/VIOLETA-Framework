@@ -36,3 +36,6 @@ def test_step2_kernels_prompts(monkeypatch):
     assert "passive" in recorded["Fact"].lower()
     assert "imperative" in recorded["Action"].lower()
     assert "cognitive" in recorded["Reflection"].lower()
+    assert data["Fact"][0]["learning_type"] == "Declarative"
+    assert data["Action"][0]["learning_type"] == "Procedural"
+    assert data["Reflection"][0]["learning_type"] == "Metacognitive"
