@@ -334,18 +334,31 @@ output:
 
 
 def step2_why_it_matters(atomic_unit: str, kernel: dict) -> List[str]:
-        """Generate 1-3 short reasons why a kernel matters."""
+        """Generate a couple of short reasons why a kernel matters."""
         system_prompt = """
 You are a helpful assistant for the VIOLETA framework.
-Given an atomic unit and a kernel mapping (with input, verb, output),
-provide 1-3 brief reasons why the kernel matters. Return the reasons
-as a JSON list of strings ordered from most to least important.
+
+Given an atomic unit and a kernel mapping (with input, verb, and output), provide 1–3 concise reasons **why mastering this kernel is important in real life**.
+
+Guidelines:
+• Focus on the practical, functional, or safety-related value of knowing and applying this fact or skill.
+• Emphasise how it contributes to competence, efficiency, safety, or long-term success.
+• Avoid restating the kernel itself; explain its *value*.
+• Avoid decorative, subjective, or purely aesthetic reasons unless they are directly linked to a functional outcome.
+• Order the reasons from most to least important based on real-life impact.
+
+Return the reasons as a JSON list of strings.
 
 Example:
 <example>
-atomic unit: Knife Skills
-kernel: {"kernel": "Slice whole vegetables into uniform strips.", "input": "whole vegetables", "verb": "slice", "output": "uniform strips"}
-output: ["ensures even cooking"]
+atomic unit: Budgeting
+{"kernel": "Meat has protein, which builds muscle and aids recovery.", "input": "meat", "verb": "has", "output": "protein, which builds muscle and aids recovery"}
+output:
+[
+  "supports muscle growth and repair after physical activity",
+  "helps maintain healthy immune function",
+  "provides essential amino acids the body cannot produce on its own"
+]
 </example>
         """
 
