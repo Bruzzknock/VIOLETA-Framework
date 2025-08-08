@@ -446,11 +446,76 @@ Our Kernels with Benefits: {kernels_with_benefits}
 def step3a(kernel: dict) -> str:
         """Find an analogy for a kernel while preserving its benefits."""
         system_prompt = """
-### STEP 3A – ANALOGY FOR EACH KERNEL
-Given a kernel and its benefits, produce a concise analogy that teaches the kernel
-and upholds why the kernel matters.
+STEP 3A – ANALOGY FOR EACH KERNEL
+Given a kernel and its benefits, produce a concise analogy that explains the kernel and demonstrates why each of its benefits is important.
 
-Return the analogy as a short paragraph.
+Instructions:
+
+Provide 2 to 3 distinct analogies for each kernel.
+
+For each analogy, first state the analogy as a single-sentence header.
+
+Then, in a paragraph below the header, write the analogy.
+
+Below that explain how the analogy works.
+
+Within the explanation, use bold text to explicitly link each of the kernel's benefits to a corresponding part of the analogy.
+
+Example Kernel:
+Kernel: Record all categorized expenses in a financial tracking system.
+Benefits:
+
+Enables accurate tracking of spending habits and identification of areas for savings.
+
+Provides essential data for creating realistic budgets and achieving financial goals.
+
+Facilitates quick detection of financial discrepancies or potential fraud.
+
+Desired Output Format:
+Analogy 1: [Your analogy header]
+[Paragraph explaining the analogy, with bolded connections to each benefit]
+
+Analogy 2: [Your analogy header]
+[Paragraph explaining the analogy, with bolded connections to each benefit]
+
+<example>
+Kernel: Record all categorized expenses in a financial tracking system.
+Benefits:
+
+Enables accurate tracking of spending habits and identification of areas for savings.
+
+Provides essential data for creating realistic budgets and achieving financial goals.
+
+Facilitates quick detection of financial discrepancies or potential fraud.
+
+Analogy 1: Curating the Memories in a Time Traveler’s Archive
+A time traveler maintains an intricate archive of every moment they’ve visited — each memory stored in a crystal labeled by era, location, 
+and emotional tone — just like recording each expense in its correct financial category. After every jump, the traveler logs the exact 
+date, people met, and events witnessed, ensuring the timeline stays intact.
+In this analogy, reviewing which eras they revisit most often helps the traveler understand their personal patterns and biases, mirroring 
+how tracking expenses reveals spending habits and areas for savings. The archive also guides the traveler in planning future journeys to 
+prevent paradoxes and ensure they have enough chrono-energy for the trip, just as your records provide essential data for creating 
+realistic budgets and achieving financial goals. And if a crystal has been altered by a rival time traveler — a tiny change in the 
+hue or the recorded events — the archivist spots the distortion immediately, reflecting how quick detection of discrepancies or fraud 
+works in a financial tracking system.
+
+Analogy 2: Operating a Starship’s Navigation Log
+A starship captain keeps a precise navigation log that records every hyperspace jump, resource use, and cargo manifest — just like recording each 
+expense into the correct financial category. The log is updated after every mission, ensuring no data point is lost in the void.
+In this analogy, tracking the ship’s resource consumption across missions reveals where fuel, food, or energy is wasted, just as tracking categorized 
+expenses highlights spending habits and areas for savings. The navigation log also provides critical data for planning long voyages and allocating 
+supplies, mirroring how your expense records give essential information for creating realistic budgets and achieving financial goals. And if an 
+alien stowaway tampers with the cargo or a system glitch alters the coordinates, the captain can spot the irregularity immediately, just like 
+quick detection of discrepancies or potential fraud in a financial tracking system.
+
+Analogy 3: Maintaining a Wizard’s Spellbook
+A wise wizard keeps a meticulously organized spellbook, with each spell written under its proper school of magic — fire, illusion, healing, and so on — 
+just like recording each expense into the correct financial category. The wizard updates it after every magical encounter, ensuring no incantation is forgotten.
+In this analogy, tracking which spells are used most often lets the wizard see their strengths and weaknesses, just as tracking categorized expenses 
+reveals spending habits and areas for savings. The spellbook also guides the wizard when preparing for future battles or quests, just as your records 
+provide essential data for creating realistic budgets and achieving financial goals. And if a page has been tampered with by a mischievous imp, the 
+wizard spots the anomaly at once, mirroring how quick detection of financial discrepancies or fraud works in a tracking system.
+</example>
         """
         model = get_llm()
         kernel_text = kernel.get("kernel")
