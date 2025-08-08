@@ -464,18 +464,21 @@ Within the explanation, use bold text to explicitly link each of the kernel's be
 Example Kernel:
 Kernel: Record all categorized expenses in a financial tracking system.
 Benefits:
-
-Enables accurate tracking of spending habits and identification of areas for savings.
-
-Provides essential data for creating realistic budgets and achieving financial goals.
-
-Facilitates quick detection of financial discrepancies or potential fraud.
+- Enables accurate tracking of spending habits and identification of areas for savings.
+- Provides essential data for creating realistic budgets and achieving financial goals.
+- Facilitates quick detection of financial discrepancies or potential fraud.
 
 Desired Output Format:
 Analogy 1: [Your analogy header]
+[Paragraph describing the analogy]
 [Paragraph explaining the analogy, with bolded connections to each benefit]
 
 Analogy 2: [Your analogy header]
+[Paragraph describing the analogy]
+[Paragraph explaining the analogy, with bolded connections to each benefit]
+
+Analogy 3: [Your analogy header]
+[Paragraph describing the analogy]
 [Paragraph explaining the analogy, with bolded connections to each benefit]
 
 <example>
