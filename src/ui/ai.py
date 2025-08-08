@@ -73,7 +73,7 @@ def step2_kernels(atomic_unit: str, atomic_skills) -> str:
                 "Declarative": (
                         """
 You are a helpful assistant for the VIOLETA framework.
-Given a declarative atomic skill, create a one-sentence kernel for the skill.
+Given a declarative atomic skill, create one or more one-sentence kernels for the skill.
 Express the fact in passive voice and treat the mental act as the transformation.
 Use one passive verb phrase only (e.g. "are classified as").
 Keep the Input -> Transformation -> Output mapping explicit in the JSON fields.
@@ -95,12 +95,39 @@ output:
   ]
 }
 </example>
+<example>
+atomic unit: Culinary Basics
+atomic skill: Common cooking terms (sauté, simmer, blanch)
+output:
+{
+  "Common cooking terms (sauté, simmer, blanch)": [
+    {
+      "kernel": "Sauté is defined as quickly cooking food in a small amount of hot fat.",
+      "input": "sauté",
+      "verb": "is defined as",
+      "output": "quickly cooking food in a small amount of hot fat"
+    },
+    {
+      "kernel": "Simmer is defined as gently cooking food in liquid held just below boiling.",
+      "input": "simmer",
+      "verb": "is defined as",
+      "output": "gently cooking food in liquid held just below boiling"
+    },
+    {
+      "kernel": "Blanch is defined as briefly boiling food and then cooling it rapidly to halt cooking.",
+      "input": "blanch",
+      "verb": "is defined as",
+      "output": "briefly boiling food and then cooling it rapidly to halt cooking"
+    }
+  ]
+}
+</example>
                         """
                 ),
                 "Procedural": (
                         """
 You are a helpful assistant for the VIOLETA framework.
-Given a procedural atomic skill, create a one-sentence kernel for the skill.
+Given a procedural atomic skill, create one or more one-sentence kernels for the skill.
 Express the action in active voice, present tense.
 Use exactly one imperative or present-simple verb that a learner would perform.
 Keep the Input -> Transformation -> Output mapping explicit in the JSON fields.
@@ -122,12 +149,33 @@ output:
   ]
 }
 </example>
+<example>
+atomic unit: Knife Skills
+atomic skill: Slice and dice vegetables
+output:
+{
+  "Slice and dice vegetables": [
+    {
+      "kernel": "Slice whole vegetables into uniform strips.",
+      "input": "whole vegetables",
+      "verb": "slice",
+      "output": "uniform strips"
+    },
+    {
+      "kernel": "Dice vegetable strips into small cubes.",
+      "input": "vegetable strips",
+      "verb": "dice",
+      "output": "small cubes"
+    }
+  ]
+}
+</example>
                         """
                 ),
                 "Metacognitive": (
                         """
 You are a helpful assistant for the VIOLETA framework.
-Given a metacognitive atomic skill, create a one-sentence kernel for the skill.
+Given a metacognitive atomic skill, create one or more one-sentence kernels for the skill.
 Express the reflective act in active voice, present tense.
 Use exactly one cognitive verb (e.g., plan, monitor, decide, evaluate, prioritise, adjust) about self-regulation or strategy.
 Keep the Input -> Transformation -> Output mapping explicit in the JSON fields.
@@ -145,6 +193,27 @@ output:
       "input": "candidate solutions",
       "verb": "evaluate",
       "output": "best option",
+    }
+  ]
+}
+</example>
+<example>
+atomic unit: Study Self-Regulation
+atomic skill: Monitor and adjust study schedule
+output:
+{
+  "Monitor and adjust study schedule": [
+    {
+      "kernel": "Monitor study progress to detect falling behind schedule.",
+      "input": "study progress",
+      "verb": "monitor",
+      "output": "detection of falling behind schedule"
+    },
+    {
+      "kernel": "Adjust study sessions to realign with weekly goals.",
+      "input": "study sessions",
+      "verb": "adjust",
+      "output": "realignment with weekly goals"
     }
   ]
 }
