@@ -92,8 +92,6 @@ if isinstance(skill_kernels, dict):
 for idx, kernel in enumerate(all_kernels, start=1):
     if isinstance(kernel, dict):
         kernel.setdefault("id", f"k{idx}")
-        if "fact" not in kernel and "kernel" in kernel:
-            kernel["fact"] = kernel["kernel"]
 
 benefit_options = list(benefits.values())
 

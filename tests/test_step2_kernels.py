@@ -40,4 +40,5 @@ def test_step2_kernels_prompts(monkeypatch):
     assert data["Action"][0]["learning_type"] == "Procedural"
     assert data["Reflection"][0]["learning_type"] == "Metacognitive"
     assert "id" in data["Fact"][0]
-    assert data["Fact"][0]["fact"] == data["Fact"][0]["kernel"]
+    assert "kernel" in data["Fact"][0]
+    assert "fact" not in data["Fact"][0]
