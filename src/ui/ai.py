@@ -278,8 +278,6 @@ output:
                         for kernel in kernels:
                                 if isinstance(kernel, dict):
                                         kernel.setdefault("id", f"k{counter}")
-                                        if "fact" not in kernel and "kernel" in kernel:
-                                                kernel["fact"] = kernel["kernel"]
                                         counter += 1
 
         return json.dumps(results, indent=2)
