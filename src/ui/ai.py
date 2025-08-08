@@ -271,7 +271,7 @@ output:
                                 data = {skill: [{"kernel": cleaned, "learning_type": lt}]}
                         results.update(data)
 
-        # Ensure each kernel has a unique id and a "fact" alias of the kernel text
+        # Ensure each kernel has a unique id
         counter = 1
         for kernels in results.values():
                 if isinstance(kernels, list):
