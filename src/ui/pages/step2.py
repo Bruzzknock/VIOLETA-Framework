@@ -108,6 +108,12 @@ if "benefit_inputs" not in st.session_state:
             "new": "",
         }
 
+
+def suggest_benefits(kern):
+    with st.spinner("Generating why it matters..."):
+        reasons = ai.step2_why_it_matters(atomic_unit, kern)
+    st.session_state.benefit_inputs[kern["id"]]["new"] = "\n".join(reasons)
+
 for kernel in all_kernels:
     st.markdown(f"**{kernel.get('kernel', '')}**")
     st.session_state.benefit_inputs[kernel["id"]]["selected"] = st.multiselect(
@@ -121,6 +127,11 @@ for kernel in all_kernels:
         value=st.session_state.benefit_inputs[kernel["id"]]["new"],
         key=f"new_{kernel['id']}",
         height=80,
+    )
+    st.button(
+        "Generate Why It Matters",
+        key=f"gen_{kernel['id']}",
+        on_click=lambda k=kernel: suggest_benefits(k),
     )
     st.write("---")
 

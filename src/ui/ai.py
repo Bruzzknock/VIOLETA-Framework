@@ -145,7 +145,7 @@ output:
       "kernel": "Transform readable data into unreadable data with a reversible rule.",
       "input": "readable data",
       "verb": "transform into",
-      "output": "unreadable data with a reversible rule",
+      "output": "unreadable data with a reversible rule"
     }
   ]
 }
@@ -193,7 +193,7 @@ output:
       "kernel": "Evaluate candidate solutions against criteria to select the best option.",
       "input": "candidate solutions",
       "verb": "evaluate",
-      "output": "best option",
+      "output": "best option"
     }
   ]
 }
@@ -281,6 +281,41 @@ output:
                                         counter += 1
 
         return json.dumps(results, indent=2)
+
+
+def step2_why_it_matters(atomic_unit: str, kernel: dict) -> List[str]:
+        """Generate 1-3 short reasons why a kernel matters."""
+        system_prompt = """
+You are a helpful assistant for the VIOLETA framework.
+Given an atomic unit and a kernel mapping (with input, verb, output),
+provide 1-3 brief reasons why the kernel matters. Return the reasons
+as a JSON list of strings ordered from most to least important.
+
+Example:
+<example>
+atomic unit: Knife Skills
+kernel: {"kernel": "Slice whole vegetables into uniform strips.", "input": "whole vegetables", "verb": "slice", "output": "uniform strips"}
+output: ["ensures even cooking"]
+</example>
+        """
+
+        model = get_llm()
+        lc_messages = [SystemMessage(content=system_prompt)]
+        lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
+        lc_messages.append(HumanMessage(content=f"Kernel: {json.dumps(kernel)}"))
+
+        response = model.invoke(lc_messages)
+        cleaned = remove_think_block(response.content)
+        cleaned = remove_code_fences(cleaned)
+        try:
+                data = json.loads(cleaned)
+                if isinstance(data, list):
+                        return [str(r).strip() for r in data if str(r).strip()]
+                if isinstance(data, str):
+                        return [data.strip()]
+        except Exception:
+                pass
+        return [cleaned.strip()] if cleaned.strip() else []
 
 
 
