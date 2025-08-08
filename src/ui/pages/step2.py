@@ -97,16 +97,16 @@ benefit_options = list(benefits.values())
 
 if "benefit_inputs" not in st.session_state:
     st.session_state.benefit_inputs = {}
-    for kernel in all_kernels:
-        existing = [
-            benefits[m["benefit_id"]]
-            for m in benefit_mappings
-            if m.get("kernel_id") == kernel.get("id") and m.get("benefit_id") in benefits
-        ]
-        st.session_state.benefit_inputs[kernel["id"]] = {
-            "selected": existing,
-            "new": "",
-        }
+
+for kernel in all_kernels:
+    existing = [
+        benefits[m["benefit_id"]]
+        for m in benefit_mappings
+        if m.get("kernel_id") == kernel.get("id") and m.get("benefit_id") in benefits
+    ]
+    st.session_state.benefit_inputs.setdefault(
+        kernel["id"], {"selected": existing, "new": ""}
+    )
 
 
 def suggest_benefits(kern):
