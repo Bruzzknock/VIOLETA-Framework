@@ -34,6 +34,8 @@ REQUIRED_SECTIONS = [
     "theme_name",
     "learning_types",
     "kernel_theme_mapping",
+    "kernel_benefits",
+    "kernel_benefit_mappings",
     "emotional_arc",
     "layered_feelings",
     "mechanic_mappings",
@@ -210,6 +212,46 @@ def save_kernel_mappings(mappings: str) -> None:
 def load_kernel_mappings():
     data = _load_data()
     raw = data.get("kernel_mappings", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
+def save_kernel_benefits(benefits: str) -> None:
+    """Save kernel benefits to the gdsf file."""
+    try:
+        parsed = json.loads(benefits)
+    except Exception:
+        parsed = benefits
+    data = _load_data()
+    data["kernel_benefits"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_kernel_benefits():
+    data = _load_data()
+    raw = data.get("kernel_benefits", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
+def save_kernel_benefit_mappings(mappings: str) -> None:
+    """Save kernel to benefit mapping table."""
+    try:
+        parsed = json.loads(mappings)
+    except Exception:
+        parsed = mappings
+    data = _load_data()
+    data["kernel_benefit_mappings"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_kernel_benefit_mappings():
+    data = _load_data()
+    raw = data.get("kernel_benefit_mappings", {}).get("value", "")
     try:
         return json.loads(raw)
     except Exception:
