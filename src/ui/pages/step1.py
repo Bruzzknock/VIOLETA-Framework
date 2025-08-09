@@ -9,35 +9,47 @@ st.info(
     "avoid using them as atomic units."
 )
 
+saved_types = set(app_utils.load_learning_types())
+saved_atomic_unit = app_utils.load_atomic_unit()
+
 with st.form("step1_form"):
 
     st.subheader("Learning Types")
-    st.checkbox(
+    lt_declarative = st.checkbox(
         "Declarative (static) – facts, concepts, schemas",
-        disabled=True,
         key="lt_declarative",
+        value="Declarative" in saved_types,
     )
-    st.checkbox(
+    lt_procedural = st.checkbox(
         "Procedural (dynamic) – algorithms, skills, sequences",
-        disabled=True,
         key="lt_procedural",
+        value="Procedural" in saved_types,
     )
     st.checkbox(
         "Psychomotor – fine- and gross-motor execution",
         disabled=True,
-        key="lt_psychomotor",
+        value="Psychomotor" in saved_types,
     )
-    st.checkbox(
+    lt_metacognitive = st.checkbox(
         "Metacognitive / Conditional – when & why to deploy 1-3",
-        disabled=True,
         key="lt_metacognitive",
+        value="Metacognitive" in saved_types,
     )
     atomic_unit_input = st.text_input(
-        "What is the atomic unit that the game should be based on?"
+        "What is the atomic unit that the game should be based on?",
+        value=saved_atomic_unit,
     )
     submitted = st.form_submit_button("Next")
 
 if submitted:
+    selected_types = []
+    if lt_declarative:
+        selected_types.append("Declarative")
+    if lt_procedural:
+        selected_types.append("Procedural")
+    if lt_metacognitive:
+        selected_types.append("Metacognitive")
+    app_utils.save_learning_types(selected_types)
     app_utils.save_atomic_unit(atomic_unit_input)
 
 if "messages" not in st.session_state:

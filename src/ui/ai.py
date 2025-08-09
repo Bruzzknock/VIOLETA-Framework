@@ -67,84 +67,211 @@ the designer’s educational goals, target audience, and contextual constraints.
 
 
 def step2_kernels(atomic_unit: str, atomic_skills) -> str:
-        """Generate kernel sentences for each atomic skill recursively."""
+        """Generate kernel sentences for each atomic skill by learning type."""
 
-        system_prompt = (
-                """
-                You are a helpful assistant for the VIOLETA framework.
-Given an atomic skills, create a one-sentence kernel for each
-skill. A kernel follows the pattern: Input -> Transformation -> Output and
-uses active verbs and plain language. Use one active verb only per sentence.
-If a skill needs more than one verb, split it into multiple kernels.
-Return the kernels as a JSON object mapping each skill to its kernel sentence.
+        prompts = {
+                "Declarative": (
+                        """
+You are a helpful assistant for the VIOLETA framework.
+
+Given a declarative atomic skill, create one or more one-sentence kernels for the skill.
+
+Each kernel must:
+• Follow the Input → Transformation → Output mapping explicitly.
+• Express a causal or functional fact that supports real-world mastery of the skill.
+• Use one active verb (or one passive verb phrase if unavoidable, e.g., "are classified as").
+• Avoid purely descriptive, aesthetic, or sensory traits (e.g., "crisp texture," "bright color") unless directly linked to a functional property relevant to the skill.
+• Be concrete and teach something actionable or scientifically relevant.
+• Avoid subjective judgments or opinions.
+
+Return the kernels as a JSON object mapping each skill to its kernel sentence, with explicit 'input', 'verb', and 'output' fields.
+
+Before finalizing, run a "Quality Gate":
+1. Does the kernel directly advance mastery of the atomic skill?
+2. Does it show a clear cause-and-effect relationship?
+3. Could it be mapped to a game mechanic where success requires applying this fact?
+
+If any answer is "no," discard or rewrite the kernel.
 
 Examples:
 <example>
-atomic unit: Cryptography
-atomic skill: Encryption
+atomic unit: Nutrition
+atomic skill: Protein sources
 output:
-{{
-  "Encryption": [
-    {{
-      "kernel":"Transform readable data into unreadable data with a reversible rule.",
-      "input": "readable data",
-      "verb": "transform into",
-      "output": "unreadable data with a reversible rule"
-    }}
+{
+  "Protein sources": [
+    {
+      "kernel": "Meat has protein, which builds muscle and aids recovery.",
+      "input": "meat",
+      "verb": "has",
+      "output": "protein, which builds muscle and aids recovery"
+    },
+    {
+      "kernel": "Eggs contain protein that supports tissue repair.",
+      "input": "eggs",
+      "verb": "contain",
+      "output": "protein that supports tissue repair"
+    }
   ]
-}}
+}
 </example>
 
 <example>
-atomic unit: Cryptography
-atomic skill: Hashing
+atomic unit: Energy nutrients
+atomic skill: Carbohydrates
 output:
-{{
-  "Hashing": [
-    {{
-      "kernel": "Condense variable-length data into a fixed-length fingerprint.",
-      "input": "variable-length data",
-      "verb": "condense into",
-      "output": "fixed-length fingerprint"
-    }}
+{
+  "Carbohydrates": [
+    {
+      "kernel": "Bread provides quick energy for the body.",
+      "input": "bread",
+      "verb": "provides",
+      "output": "quick energy for the body"
+    },
+    {
+      "kernel": "Potatoes supply energy that fuels activity.",
+      "input": "potatoes",
+      "verb": "supply",
+      "output": "energy that fuels activity"
+    }
   ]
-}}
+}
 </example>
+        """
+                ),
+                "Procedural": (
+                        """
+You are a helpful assistant for the VIOLETA framework.
 
+Given a procedural atomic skill, create one or more one-sentence kernels for the skill.
+
+Each kernel must:
+• Be in active voice, present tense.
+• Contain exactly one imperative or present-simple verb that a learner would physically or mentally perform.
+• Clearly follow the Input → Transformation → Output mapping in the JSON fields.
+• Describe an action that advances mastery of the skill in a real-world context.
+• Avoid filler actions or decorative phrasing (e.g., “prepare nicely,” “carefully handle”) unless the adverb specifies a measurable outcome.
+• Avoid subjective judgments or aesthetic results unless they have functional significance.
+• Make the output tangible or verifiable (size, form, state, structure, readiness).
+
+**Quality Gate before finalizing:**
+1. Does the action directly contribute to mastering the atomic skill?
+2. Is there a clear transformation from the input state to the output state?
+3. Could the step be mapped to a concrete in-game mechanic that requires correct execution?
+
+If any answer is “no,” discard or rewrite the kernel.
+
+Return the kernels as a JSON object mapping each skill to its kernel sentence, with explicit 'input', 'verb', and 'output' fields.
+
+
+Examples:
 <example>
-atomic unit: Cryptography
-atomic skill: Modulo Division Hashing
-{{
-  "Modulo Division Hashing": [
-    {{
-      "kernel": "Divide the key by the table size to obtain its remainder index.",
-      "input": "key and table size",
-      "verb": "divide by",
-      "output": "remainder index"
-    }},
-    {{
-      "kernel": "Add the modulus to a negative key to obtain a positive remainder.",
-      "input": "negative key and modulus",
-      "verb": "add to",
-      "output": "positive remainder"
-    }},
-    {{
-      "kernel": "Link colliding keys into a chain to keep every entry reachable.",
-      "input": "colliding keys at same index",
-      "verb": "link into",
-      "output": "chain with reachable entries"
-    }},
-    {{
-      "kernel": "Divide the number of stored entries by the table size to calculate the load factor.",
-      "input": "number of entries and table size",
-      "verb": "divide by",
-      "output": "load factor"
-    }}
+atomic unit: Digital Photography
+atomic skill: Adjust camera exposure
+output:
+{
+  "Adjust camera exposure": [
+    {
+      "kernel": "Increase shutter speed to reduce motion blur in bright light.",
+      "input": "shutter speed",
+      "verb": "increase",
+      "output": "reduced motion blur in bright light"
+    },
+    {
+      "kernel": "Decrease aperture size to increase depth of field.",
+      "input": "aperture size",
+      "verb": "decrease",
+      "output": "increased depth of field"
+    }
   ]
-}}
+}
 </example>
-                """
-        )
+<example>
+atomic unit: Data Analysis
+atomic skill: Sort dataset by value
+output:
+{
+  "Sort dataset by value": [
+    {
+      "kernel": "Arrange data rows in ascending order by numeric value.",
+      "input": "data rows",
+      "verb": "arrange",
+      "output": "ascending order by numeric value"
+    }
+  ]
+}
+</example>
+                        """
+                ),
+                "Metacognitive": (
+                        """
+You are a helpful assistant for the VIOLETA framework.
+
+Given a metacognitive atomic skill, create one or more one-sentence kernels for the skill.
+
+Each kernel must:
+• Be in active voice, present tense.
+• Contain exactly one cognitive verb about self-regulation, strategic thinking, or reflective adjustment (e.g., plan, monitor, decide, evaluate, prioritise, adjust, reflect).
+• Explicitly follow the Input → Transformation → Output mapping in the JSON fields.
+• Describe a mental process that advances mastery of the atomic skill in a real-world context.
+• Avoid vague introspection without actionable outcomes (e.g., “think about the task”).
+• Make the output tangible or verifiable (e.g., improved plan, detected issue, revised approach).
+
+**Quality Gate before finalizing:**
+1. Does the cognitive act directly contribute to mastering the atomic skill?
+2. Is there a clear transformation from the input state to the output state?
+3. Could the mental step be mapped to a concrete in-game mechanic where success requires applying this reflective act?
+
+If any answer is “no,” discard or rewrite the kernel.
+
+Return the kernels as a JSON object mapping each skill to its kernel sentence, with explicit 'input', 'verb', and 'output' fields.
+
+Examples:
+<example>
+atomic unit: Project Management
+atomic skill: Risk assessment
+output:
+{
+  "Risk assessment": [
+    {
+      "kernel": "Evaluate project milestones to identify risks before they escalate.",
+      "input": "project milestones",
+      "verb": "evaluate",
+      "output": "identified risks before escalation"
+    },
+    {
+      "kernel": "Adjust resource allocation to prevent delays in critical tasks.",
+      "input": "resource allocation",
+      "verb": "adjust",
+      "output": "prevention of delays in critical tasks"
+    }
+  ]
+}
+</example>
+<example>
+atomic unit: Competitive Strategy
+atomic skill: Match strategy adaptation
+output:
+{
+  "Match strategy adaptation": [
+    {
+      "kernel": "Monitor opponent tactics to detect exploitable patterns.",
+      "input": "opponent tactics",
+      "verb": "monitor",
+      "output": "detected exploitable patterns"
+    },
+    {
+      "kernel": "Revise team formation to counter emerging threats.",
+      "input": "team formation",
+      "verb": "revise",
+      "output": "counter to emerging threats"
+    }
+  ]
+}
+</example>
+                        """
+                ),
+        }
 
         model = get_llm()
 
@@ -161,58 +288,134 @@ atomic skill: Modulo Division Hashing
                         return sk
                 return [s.strip() for s in str(sk).splitlines() if s.strip()]
 
-        skills = _flatten(atomic_skills)
+        if isinstance(atomic_skills, dict):
+                skills_by_type = {k: _flatten(v) for k, v in atomic_skills.items()}
+        else:
+                skills_by_type = {"Procedural": _flatten(atomic_skills)}
+
         results = {}
 
-        for skill in skills:
-                lc_messages = [SystemMessage(content=system_prompt)]
-                lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
-                lc_messages.append(HumanMessage(content=f"Atomic skill: {skill}"))
+        for lt, skills in skills_by_type.items():
+                prompt = prompts.get(lt, prompts["Procedural"])
+                for skill in skills:
+                        lc_messages = [SystemMessage(content=prompt)]
+                        lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
+                        lc_messages.append(HumanMessage(content=f"Atomic skill: {skill}"))
 
-                response = model.invoke(lc_messages)
-                cleaned = remove_think_block(response.content)
-                cleaned = remove_code_fences(cleaned)
-                try:
-                        data = json.loads(cleaned)
-                except Exception:
-                        data = {skill: cleaned}
-                results.update(data)
+                        response = model.invoke(lc_messages)
+                        cleaned = remove_think_block(response.content)
+                        cleaned = remove_code_fences(cleaned)
+                        try:
+                                data = json.loads(cleaned)
+                                for k, kernels in list(data.items()):
+                                        if isinstance(kernels, list):
+                                                for kernel in kernels:
+                                                        if isinstance(kernel, dict):
+                                                                kernel["learning_type"] = lt
+                                        elif isinstance(kernels, dict):
+                                                kernels["learning_type"] = lt
+                                                data[k] = [kernels]
+                                        else:
+                                                data[k] = [{"kernel": kernels, "learning_type": lt}]
+                        except Exception:
+                                data = {skill: [{"kernel": cleaned, "learning_type": lt}]}
+                        results.update(data)
+
+        # Ensure each kernel has a unique id
+        counter = 1
+        for kernels in results.values():
+                if isinstance(kernels, list):
+                        for kernel in kernels:
+                                if isinstance(kernel, dict):
+                                        kernel.setdefault("id", f"k{counter}")
+                                        counter += 1
 
         return json.dumps(results, indent=2)
 
 
+def step2_why_it_matters(atomic_unit: str, kernel: dict) -> List[str]:
+        """Generate a couple of short reasons why a kernel matters."""
+        system_prompt = """
+You are a helpful assistant for the VIOLETA framework.
+
+Given an atomic unit and a kernel mapping (with input, verb, and output), provide 1–3 concise reasons **why mastering this kernel is important in real life**.
+
+Guidelines:
+• Focus on the practical, functional, or safety-related value of knowing and applying this fact or skill.
+• Emphasise how it contributes to competence, efficiency, safety, or long-term success.
+• Avoid restating the kernel itself; explain its *value*.
+• Avoid decorative, subjective, or purely aesthetic reasons unless they are directly linked to a functional outcome.
+• Order the reasons from most to least important based on real-life impact.
+
+Return the reasons as a JSON list of strings.
+
+Example:
+<example>
+atomic unit: Budgeting
+{"kernel": "Meat has protein, which builds muscle and aids recovery.", "input": "meat", "verb": "has", "output": "protein, which builds muscle and aids recovery"}
+output:
+[
+  "supports muscle growth and repair after physical activity",
+  "helps maintain healthy immune function",
+  "provides essential amino acids the body cannot produce on its own"
+]
+</example>
+        """
+
+        model = get_llm()
+        lc_messages = [SystemMessage(content=system_prompt)]
+        lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
+        lc_messages.append(HumanMessage(content=f"Kernel: {json.dumps(kernel)}"))
+
+        response = model.invoke(lc_messages)
+        cleaned = remove_think_block(response.content)
+        cleaned = remove_code_fences(cleaned)
+        try:
+                data = json.loads(cleaned)
+                if isinstance(data, list):
+                        return [str(r).strip() for r in data if str(r).strip()]
+                if isinstance(data, str):
+                        return [data.strip()]
+        except Exception:
+                pass
+        return [cleaned.strip()] if cleaned.strip() else []
 
 
 
 
-def step3a(atomic_skills, messages: List[Dict[str, str]]) -> str:
+
+
+def step3a(atomic_unit, atomic_skills, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing a theme."""
         system_prompt = """
-### STEP 3A \u2013 PICK A CANDIDATE THEME
-Answer the question: "In what kind of world or situation would someone need to use the skills from my atomic unit regularly?" Provide a two-sentence mood blurb describing the world's flavour, stakes and common activities.
+STEP 3A – PICK A CANDIDATE THEME  
 
-Examples:
-<example>
-atomic unit: Programming Syntax
-atomic skills: ["Data types", "Variables declaration and assignment", "Operators and their precedence", "Control flow (conditionals, loops)", "Functions definition and invocation", "Scope management", "Arrays and collections syntax", "Error handling", "String manipulation functions"]
-output:
-Fantasy Theme: Magic and Code
-In a realm where technology and magic intertwine, the world of Arcanecode is governed by the principles of programming and spellcasting. Wizards and sorcerers wielding arcane knowledge cast spells using intricate code syntax, 
-with data types representing different magical elements—fire, water, earth, and air. Variables declaration and assignment are essential for assigning magical energies or resources, while operators and precedence dictate the 
-order in which spells are combined. Control flow through conditionals and loops governs the decision-making processes of magic, such as casting protective shields until a specific condition is met. Functions definition and 
-invocation allow for reusable spells and magical constructs, while scope management limits the effect of spells to certain areas or durations. Error handling is crucial for addressing failed spells or unexpected magical reactions, 
-and string manipulation shapes and alters magical runes or incantations. In this world, the stakes are high—incorrect code can lead to disastrous consequences like spells backfiring or magical energy overflows. Being a skilled programmer 
-in Arcanecode is not just a talent; it is essential for survival and success in a realm where magic is powered by code.
+Guiding question: “In what kind of world or situation would someone need to use the skills from my atomic unit regularly?”  
 
-</example>
+You don’t want a thin reskin of the real-world process, you want a fully realised metaphorical world that stands on its own logic, lore, and stakes, yet still structurally maps to the skills in your atomic unit.  
 
-Our Atomic Skills: {atomic_skills}
+Write a two-paragraph mood blurb that:  
+
+1. Establishes a vivid, standalone setting (realistic, historical, fantastical, sci-fi, etc.) with clear, tangible stakes — success or failure should have obvious consequences in-world.  
+2. Defines the player’s role and recurring duties in that setting, showing why they hold responsibility and influence over the stakes.  
+3. Integrates all three learning types naturally:  
+   - Declarative kernels → Show their benefit as an in-world effect or consequence, without naming the real-world skill directly.  
+   - Procedural and Metacognitive kernels → Translate Input → Verb → Output into concrete in-world actions and decisions.  
+4. Ensure the theme could sustain repeated use of all skills across multiple scenarios, not just once.  
+5. Ban direct synonyms of the atomic unit’s domain terms (e.g., no “budget,” “finance,” “money,” “expenses” for budgeting), instead use in-world equivalents that arise naturally from the setting’s own logic.  
+6. Keep the theme structurally isomorphic so every kernel can map 1:1 in Step 3B without forcing it.  
+
+Output format:  
+
+Theme name: [short, evocative title]  
+Theme blurb: [two paragraphs as described above]  
         """
         model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
 
-        lc_messages.append(HumanMessage(content=f"My atomic skills are: {atomic_skills}"))
+        lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
+        lc_messages.append(HumanMessage(content=f"Atomic skills: {atomic_skills}"))
         for msg in messages:
                 if msg["role"] == "user":
                         lc_messages.append(HumanMessage(content=msg["content"]))
@@ -223,119 +426,146 @@ Our Atomic Skills: {atomic_skills}
         return remove_think_block(response.content)
 
 
-def step3b(theme: str, skill_kernels) -> str:
-        """Generate a kernel mapping table for the chosen theme."""
+def step3b(theme: str, kernels_with_benefits) -> str:
+        """Map kernels and their benefits into the chosen theme."""
         system_prompt = """
-### STEP 3B \u2013 KERNEL-BY-KERNEL MAPPING
-For each kernel from Step 2, specify an in-world element for the input, an action matching the kernel verb, and the resulting in-world element output. Mark the row with `Y` if the Input \u2192 Transformation \u2192 Output logic is preserved, otherwise `N`.
-The theme must cover every kernel. Revise the theme if any kernel cannot be mapped.
+### STEP 3B – KERNEL ANALOGIES
 
-Return the result as JSON.
+Given:
+1. A theme description.
+2. A list of kernels (each with original input, verb, output, learning type, and linked benefits).
 
-Examples:
-<example>
-theme: Fantasy Theme: Magic and Code
-kernels: {"Data types": [{"kernel": "Transform data without context into structured information using predefined categories.", "input": "data without context", "verb": "transform into", "output": "structured information with data types"}], "Variables declaration and assignment": [{"kernel": "Create or update variable storage to hold specific values or references.", "input": "variable and value/reference", "verb": "create/update", "output": "variable storage with assigned value/reference"}]}
-output:
+Task:
+For each kernel, rewrite it so it fits naturally and consistently within the given theme’s world. 
+
+Rules:
+- Preserve the original Input → Verb → Output logic exactly, but express it entirely in in-world terms that make sense in the theme. 
+- Do NOT use any direct synonyms or vocabulary from the original real-world domain unless they are logically part of the theme.
+- The in-world Input must be semantically equivalent to the original Input.
+- The in-world Output must be semantically equivalent to the original Output.
+- The in-world Verb must perform the same transformation between input and output.
+- For each benefit, explicitly describe how it manifests in-world.
+- Mark `"preserved": "Y"` only if all three elements (Input, Verb, Output) are fully preserved in meaning.
+
+Output format:
 {
-  "theme": "Fantasy Theme: Magic and Code",
   "kernels": [
     {
-      "kernel": "Data types",
-      "input": "raw magical energy",
-      "verb": "transform into",
-      "output": "categorized magic (e.g., fire, water)",
-      "preserved": "Y"
-    },
-    {
-      "kernel": "Variables declaration and assignment",
-      "input": "magic energy source",
-      "verb": "bind into",
-      "output": "bound amulet or container",
-      "preserved": "Y"
-    },
-    {
-      "kernel": "Control flow (conditionals, loops)",
-      "input": "protective magic and conditions",
-      "verb": "cast based on",
-      "output": "active protective shield",
-      "preserved": "Y"
-    },
-    {
-      "kernel": "Functions definition and invocation (define function)",
-      "input": "spell parameters and task",
-      "verb": "define as",
-      "output": " reusable spell template",
-      "preserved": "Y"
-    },
+      "kernel": "<original kernel sentence>",
+      "original_input": "<original input>",
+      "original_verb": "<original verb>",
+      "original_output": "<original output>",
+      "in_world_input": "<rewritten input in theme terms>",
+      "in_world_verb": "<rewritten verb in theme terms>",
+      "in_world_output": "<rewritten output in theme terms>",
+      "in_world_kernel_sentence": "<single sentence combining in-world input, verb, and output>",
+      "benefit_mapping": [
+        { "benefit": "<benefit sentence>", "in_world_effect": "<benefit expressed in theme terms>" }
+      ],
+      "preserved": "Y" or "N"
+    }
   ]
 }
-</example>
+
         """
         model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
         lc_messages.append(HumanMessage(content=f"Theme: {theme}"))
-        lc_messages.append(HumanMessage(content=f"Kernels: {skill_kernels}"))
+        lc_messages.append(
+                HumanMessage(content=f"Kernels: {json.dumps(kernels_with_benefits)}")
+        )
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
 
 
+def step3b_all(theme: str, kernels_with_benefits: List[Dict]) -> Dict:
+        """Run step3b separately for each kernel and merge the results."""
+
+        combined = {"kernels": []}
+        for kern in kernels_with_benefits:
+                result = step3b(theme, [kern])
+                cleaned = remove_code_fences(result)
+                try:
+                        parsed = json.loads(cleaned)
+                        if isinstance(parsed, dict) and "kernels" in parsed:
+                                combined["kernels"].extend(parsed["kernels"])
+                        else:
+                                combined["kernels"].append(parsed)
+                except Exception:
+                        combined["kernels"].append(cleaned)
+        return combined
+
+
 def step2(atomic_unit, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing atomic skills."""
         system_prompt = """
-### STEP 2 · IDENTIFY THE ATOMIC SKILLS
+### STEP 2 · DECOMPOSE & TYPE-TAG THE ATOMIC SKILLS
 
-**Context**
-An *atomic unit* is a bundled set of real-world knowledge, behaviours, or skills that should be learned together as a cohesive whole. It is the educational “nucleus” of the game—what the game aims to teach or train, not as isolated trivia but as a functional, applicable cluster of competencies.  
-Atomic units can range from a narrow soft skill (e.g. assertive communication) to an entire interdisciplinary domain (e.g. systems thinking). The choice depends on educational goals, target audience, and design constraints.
+**Context**  
+An *atomic unit* is a tightly-coupled bundle of knowledge, behaviours, or skills that should be learned as one functional whole. Your job is to unpack it into the *atomic skills* a learner must master, 
+then label each skill with exactly one learning-type tag drawn from {learning_types}.
 
-**Task for the AI**
-Break the atomic unit into the smallest set of **atomic skills** that must be mastered to achieve functional competence.
+**Learning-type tags**  
+- **Declarative (D)**  — Knowing *what*: facts, terminology, conceptual relationships.  
+- **Procedural (P)**  — Knowing *how*: sequences, operations, motor or cognitive routines.  
+- **Metacognitive (M)** — Knowing *why/when*: monitoring, planning, and regulating one’s own performance.
 
-**When to STOP decomposing**
-* If the atomic unit/skill is already a single, self-contained skill or behaviour (e.g. *Encryption*), return **that one skill only**.
-* Otherwise, list each atomic skill separately.  
-  *Categories are optional*—use them only when they add clarity.
+> *If a skill clearly spans two types, choose the tag that best represents what will be **practised during gameplay or assessment***.
 
-**Coherence check**
-Every atomic skill must directly support the atomic unit’s overarching goal; drop anything tangential.
+**Task for the AI**  
+1. Break **{atomic_unit}** into its minimal set of atomic skills.  
+2. Assign exactly one tag (D, P, or M) to every skill.
 
-**Required output format**
-atomic unit: <name>
-atomic skills:
-– <skill 1>
-– <skill 2>
-…
+**When to STOP decomposing**  
+- If the atomic unit is already a single, self-contained skill or behaviour, return **that one skill only**.  
+- Otherwise, list each atomic skill on its own line—no sub-skills or sub-bullets.
 
-Examples:
-<example>
-atomic unit: Foundational Personal Budgeting - The ability to build, execute, and iterate a month-to-month budget that keeps spending below income while funding short- and long-term goals.
-atomic skills:
-- Income recording
-- Expense tracking
-- Categorisation
-- Cash-flow snapshot
-- SMART goal setting
-- Prioritisation & trade-off analysis
-- Envelope / zero-based allocation
-- Real-time variance monitoring
-- Mid-cycle adjustment
-</example>
+**Coherence check**  
+Every atomic skill must directly support the atomic unit’s functional goal; discard anything tangential.
 
-<example>
-atomic unit: Cryptography
-atomic skills:
-- Encryption
-- Decryption
-- Hashing Algorithm, modulo division method
-</example>
+**Required output format**  
+atomic unit: {atomic_unit}
 
-**Note**
-These examples illustrate *one* valid decomposition. Adapt the granularity and wording to suit your pedagogical intent and audience context. Internal coherence and direct relevance to the atomic unit matter most.
+declarative skills (D):  
+– <skill 1>  
+– <skill 2>  
 
-Our atomic unit: {atomic_unit}
+procedural skills (P):  
+– <skill 3>  
+– <skill 4>  
+
+metacognitive skills (M):  
+– <skill 5>  
+– <skill 6>  
+
+*(If a list is empty, include the heading and write “– none” so no category is skipped.)*
+
+---
+
+#### Example
+
+atomic unit: Foundational Chess Competence—play a complete game under classical rules while making sound strategic decisions.
+
+declarative skills (D):  
+– Opening principles (control centre, develop pieces, king safety)  
+– Piece valuation (relative point values, material trade-offs)  
+– Basic tactical motifs vocabulary (fork, pin, skewer, discovered attack)  
+
+procedural skills (P):  
+– Legal piece movement & captures  
+– Castling and en-passant execution  
+– Using algebraic notation to record moves  
+
+metacognitive skills (M):  
+– Choosing *when* to transition from opening to middlegame  
+– Planning a move sequence based on long-term strategic goals  
+– Evaluating positions to decide *whether* to simplify into an endgame  
+
+---
+
+*(End of prompt)*
         """
         model = get_llm()
 
@@ -363,12 +593,6 @@ def remove_code_fences(text: str) -> str:
         text = text.replace("```", "")
         return text.strip()
 
-
-def step3(atomic_skills, skill_kernels, messages: List[Dict[str, str]]) -> str:
-        """Return a chat-based response using Step 3A then Step 3B."""
-        theme = step3a(atomic_skills, messages)
-        mapping = step3b(theme, skill_kernels)
-        return f"{theme}\n\n{mapping}"
 
 def step3_mapping(theme: str, skill_kernels) -> str:
         """Backward compatible wrapper for step3b."""

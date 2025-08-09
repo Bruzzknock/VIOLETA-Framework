@@ -1,0 +1,62 @@
+import json
+from types import SimpleNamespace
+from pathlib import Path
+import sys
+import types
+
+# Provide dummy modules for optional dependencies
+sys.modules.setdefault("dotenv", types.SimpleNamespace(load_dotenv=lambda **kwargs: None))
+
+sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
+import ui.ai as ai  # noqa: E402
+
+
+def test_step2_kernels_prompts(monkeypatch):
+    recorded = {}
+
+    class FakeModel:
+        def invoke(self, messages):
+            skill_line = next(m.content for m in messages if m.content.startswith("Atomic skill"))
+            skill = skill_line.split(": ", 1)[1]
+            recorded[skill] = messages[0].content
+            fake = {skill: [{"kernel": "k", "input": "i", "verb": "v", "output": "o"}]}
+            return SimpleNamespace(content=json.dumps(fake))
+
+    monkeypatch.setattr(ai, "get_llm", lambda: FakeModel())
+
+    atomic_skills = {
+        "Declarative": ["Fact"],
+        "Procedural": ["Action"],
+        "Metacognitive": ["Reflection"],
+    }
+
+    result = ai.step2_kernels("Unit", atomic_skills)
+    data = json.loads(result)
+    assert set(data.keys()) == {"Fact", "Action", "Reflection"}
+    assert "passive" in recorded["Fact"].lower()
+    assert "imperative" in recorded["Action"].lower()
+    assert "cognitive" in recorded["Reflection"].lower()
+    assert data["Fact"][0]["learning_type"] == "Declarative"
+    assert data["Action"][0]["learning_type"] == "Procedural"
+    assert data["Reflection"][0]["learning_type"] == "Metacognitive"
+    assert "id" in data["Fact"][0]
+    assert "kernel" in data["Fact"][0]
+    assert "fact" not in data["Fact"][0]
+
+
+def test_step2_why_it_matters(monkeypatch):
+    recorded = {}
+
+    class FakeModel:
+        def invoke(self, messages):
+            recorded["messages"] = [m.content for m in messages]
+            return SimpleNamespace(content=json.dumps(["r1", "r2"]))
+
+    monkeypatch.setattr(ai, "get_llm", lambda: FakeModel())
+
+    kernel = {"kernel": "k", "input": "i", "verb": "v", "output": "o"}
+    reasons = ai.step2_why_it_matters("Unit", kernel)
+
+    assert reasons == ["r1", "r2"]
+    assert any("Atomic unit: Unit" == m for m in recorded["messages"])
+    assert any("Kernel:" in m for m in recorded["messages"])

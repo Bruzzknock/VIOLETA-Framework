@@ -32,7 +32,10 @@ REQUIRED_SECTIONS = [
     "skill_kernels",
     "theme",
     "theme_name",
+    "learning_types",
     "kernel_theme_mapping",
+    "kernel_benefits",
+    "kernel_benefit_mappings",
     "emotional_arc",
     "layered_feelings",
     "mechanic_mappings",
@@ -62,6 +65,26 @@ def save_atomic_unit(value: str) -> None:
 def load_atomic_unit() -> str:
     data = _load_data()
     return data.get("atomic_unit", {}).get("value", "")
+
+
+def save_learning_types(types: list[str]) -> None:
+    """Persist selected learning types to the gdsf file."""
+    data = _load_data()
+    data["learning_types"] = {"value": json.dumps(types)}
+    _save_data(data)
+
+
+def load_learning_types() -> list[str]:
+    """Return the learning types stored in the gdsf file."""
+    data = _load_data()
+    raw = data.get("learning_types", {}).get("value", "[]")
+    try:
+        loaded = json.loads(raw)
+        if isinstance(loaded, list):
+            return loaded
+        return [str(loaded)]
+    except Exception:
+        return []
 
 
 def _parse_atomic_skills(text: str):
@@ -102,8 +125,20 @@ def _parse_atomic_skills(text: str):
     return skills
 
 
-def save_atomic_skills(skills: str) -> None:
-    parsed = _parse_atomic_skills(skills)
+def save_atomic_skills(skills) -> None:
+    """Persist atomic skills to the gdsf file.
+
+    ``skills`` may be either a raw string entered by the user or a dictionary
+    mapping learning types to lists of skills. If a string is provided, the
+    existing ``_parse_atomic_skills`` helper is used for backwards
+    compatibility. Dictionaries are written as-is.
+    """
+
+    if isinstance(skills, str):
+        parsed = _parse_atomic_skills(skills)
+    else:
+        parsed = skills
+
     data = _load_data()
     data["atomic_skills"] = {"value": json.dumps(parsed)}
     _save_data(data)
@@ -177,6 +212,66 @@ def save_kernel_mappings(mappings: str) -> None:
 def load_kernel_mappings():
     data = _load_data()
     raw = data.get("kernel_mappings", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
+def save_kernel_benefits(benefits: str) -> None:
+    """Save kernel benefits to the gdsf file."""
+    try:
+        parsed = json.loads(benefits)
+    except Exception:
+        parsed = benefits
+    data = _load_data()
+    data["kernel_benefits"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_kernel_benefits():
+    data = _load_data()
+    raw = data.get("kernel_benefits", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
+def save_kernel_benefit_mappings(mappings: str) -> None:
+    """Save kernel to benefit mapping table."""
+    try:
+        parsed = json.loads(mappings)
+    except Exception:
+        parsed = mappings
+    data = _load_data()
+    data["kernel_benefit_mappings"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_kernel_benefit_mappings():
+    data = _load_data()
+    raw = data.get("kernel_benefit_mappings", {}).get("value", "")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
+def save_kernel_analogies(analogies) -> None:
+    """Persist selected kernel analogies to the gdsf file."""
+    try:
+        parsed = json.loads(analogies)
+    except Exception:
+        parsed = analogies
+    data = _load_data()
+    data["kernel_analogies"] = {"value": json.dumps(parsed)}
+    _save_data(data)
+
+
+def load_kernel_analogies():
+    data = _load_data()
+    raw = data.get("kernel_analogies", {}).get("value", "{}")
     try:
         return json.loads(raw)
     except Exception:
