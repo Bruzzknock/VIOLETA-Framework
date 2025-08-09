@@ -426,60 +426,37 @@ Theme blurb: [two paragraphs as described above]
         return remove_think_block(response.content)
 
 
-def step3b(theme: str, skill_kernels) -> str:
-        """Generate a kernel mapping table for the chosen theme."""
+def step3b(theme: str, kernels_with_benefits) -> str:
+        """Map kernels and their benefits into the chosen theme."""
         system_prompt = """
-### STEP 3B \u2013 KERNEL-BY-KERNEL MAPPING
-For each kernel from Step 2, specify an in-world element for the input, an action matching the kernel verb, and the resulting in-world element output. Mark the row with `Y` if the Input \u2192 Transformation \u2192 Output logic is preserved, otherwise `N`.
-The theme must cover every kernel. Revise the theme if any kernel cannot be mapped.
+### STEP 3B – KERNEL ANALOGIES
+Given a theme description and a list of kernels with their benefits, rewrite each
+kernel so that it fits the theme. For every kernel supply an in-world input,
+an action verb, and an in-world output that preserves the original
+Input → Transformation → Output logic and conveys the listed benefits.
 
-Return the result as JSON.
-
-Examples:
-<example>
-theme: Fantasy Theme: Magic and Code
-kernels: {"Data types": [{"kernel": "Transform data without context into structured information using predefined categories.", "input": "data without context", "verb": "transform into", "output": "structured information with data types"}], "Variables declaration and assignment": [{"kernel": "Create or update variable storage to hold specific values or references.", "input": "variable and value/reference", "verb": "create/update", "output": "variable storage with assigned value/reference"}]}
-output:
+Return the result as JSON with this structure:
 {
-  "theme": "Fantasy Theme: Magic and Code",
+  "theme": "<theme>",
   "kernels": [
     {
-      "kernel": "Data types",
-      "input": "raw magical energy",
-      "verb": "transform into",
-      "output": "categorized magic (e.g., fire, water)",
-      "preserved": "Y"
-    },
-    {
-      "kernel": "Variables declaration and assignment",
-      "input": "magic energy source",
-      "verb": "bind into",
-      "output": "bound amulet or container",
-      "preserved": "Y"
-    },
-    {
-      "kernel": "Control flow (conditionals, loops)",
-      "input": "protective magic and conditions",
-      "verb": "cast based on",
-      "output": "active protective shield",
-      "preserved": "Y"
-    },
-    {
-      "kernel": "Functions definition and invocation (define function)",
-      "input": "spell parameters and task",
-      "verb": "define as",
-      "output": " reusable spell template",
-      "preserved": "Y"
-    },
+      "kernel": "<original skill name>",
+      "benefits": ["<benefit1>", "<benefit2>"] ,
+      "input": "<in-world input>",
+      "verb": "<action>",
+      "output": "<in-world output>",
+      "preserved": "Y" or "N"
+    }
   ]
 }
-</example>
         """
         model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
         lc_messages.append(HumanMessage(content=f"Theme: {theme}"))
-        lc_messages.append(HumanMessage(content=f"Kernels: {skill_kernels}"))
+        lc_messages.append(
+                HumanMessage(content=f"Kernels: {json.dumps(kernels_with_benefits)}")
+        )
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)

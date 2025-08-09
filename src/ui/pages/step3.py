@@ -41,6 +41,40 @@ if "info_text" not in st.session_state:
 
 st.text_area("Step 3B Table (JSON)", key="info_text", height=200)
 
+
+def generate_kernel_mappings():
+    theme_text = app_utils.load_theme()
+    skill_kernels = app_utils.load_skill_kernels()
+    benefits = app_utils.load_kernel_benefits() or {}
+    benefit_mappings = app_utils.load_kernel_benefit_mappings() or []
+
+    all_kernels: list[dict] = []
+    if isinstance(skill_kernels, dict):
+        for kern_list in skill_kernels.values():
+            if isinstance(kern_list, list):
+                all_kernels.extend(kern_list)
+
+    for idx, kernel in enumerate(all_kernels, start=1):
+        if isinstance(kernel, dict):
+            kernel.setdefault("id", f"k{idx}")
+            btexts = []
+            for m in benefit_mappings:
+                if m.get("kernel_id") == kernel.get("id"):
+                    text = benefits.get(m.get("benefit_id"), "")
+                    if m.get("copy_override"):
+                        text = m["copy_override"]
+                    if text:
+                        btexts.append(text)
+            if btexts:
+                kernel["benefits"] = btexts
+
+    with st.spinner("Generating kernels..."):
+        generated = ai.step3b(theme_text, all_kernels)
+    st.session_state.info_text = generated
+
+
+st.button("Generate Kernels", on_click=generate_kernel_mappings)
+
 if st.button("Save Additional Info"):
     app_utils.save_kernel_theme_mapping(st.session_state.info_text)
 
