@@ -62,11 +62,12 @@ if st.session_state.kernel_index < total:
     k = kernels_with_benefits[st.session_state.kernel_index]
     st.subheader(f"Kernel {st.session_state.kernel_index + 1} of {total}")
     st.markdown(f"**{k.get('kernel', '')}**")
-    manual = st.text_area("Write your own analogies (one per line)", key="manual_analogy")
     setting = st.text_input(
         "Optional setting for generated analogies (e.g., fantasy, sci-fi)",
         key="analogy_setting",
     )
+    manual = st.text_area("Write your own analogies (one per line)", key="manual_analogy")
+
 
     if st.button("Generate analogies"):
         with st.spinner("Generating analogies..."):
