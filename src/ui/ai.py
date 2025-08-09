@@ -385,153 +385,42 @@ output:
 
 
 
-def step3a_old(atomic_skills, kernels_with_benefits, messages: List[Dict[str, str]]) -> str:
+def step3a(atomic_unit, atomic_skills, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing a theme."""
         system_prompt = """
-### STEP 3A – PICK A CANDIDATE THEME
-Answer the question: “In what kind of world or situation would someone need to use the skills from my atomic unit regularly?”
+STEP 3A – PICK A CANDIDATE THEME  
 
-Write a 4–6 sentence mood blurb that:
+Guiding question: “In what kind of world or situation would someone need to use the skills from my atomic unit regularly?”  
 
-Describes the world’s flavour, atmosphere, and stakes.
+You don’t want a thin reskin of the real-world process, you want a fully realised metaphorical world that stands on its own logic, lore, and stakes, yet still structurally maps to the skills in your atomic unit.  
 
-Explains the player’s role and common activities in that setting.
+Write a two-paragraph mood blurb that:  
 
-Briefly shows how each type of skill (Declarative, Procedural, Metacognitive) fits naturally into this world.
-    • For Declarative kernels, do not just restate the fact — use its benefit (“why it matters”) to give it an in-world effect or consequence.
-    • For Procedural and Metacognitive kernels, draw from their Input → Verb → Output logic directly.
+1. Establishes a vivid, standalone setting (realistic, historical, fantastical, sci-fi, etc.) with clear, tangible stakes — success or failure should have obvious consequences in-world.  
+2. Defines the player’s role and recurring duties in that setting, showing why they hold responsibility and influence over the stakes.  
+3. Integrates all three learning types naturally:  
+   - Declarative kernels → Show their benefit as an in-world effect or consequence, without naming the real-world skill directly.  
+   - Procedural and Metacognitive kernels → Translate Input → Verb → Output into concrete in-world actions and decisions.  
+4. Ensure the theme could sustain repeated use of all skills across multiple scenarios, not just once.  
+5. Ban direct synonyms of the atomic unit’s domain terms (e.g., no “budget,” “finance,” “money,” “expenses” for budgeting), instead use in-world equivalents that arise naturally from the setting’s own logic.  
+6. Keep the theme structurally isomorphic so every kernel can map 1:1 in Step 3B without forcing it.  
 
-Ensure the theme is cohesive, emotionally engaging, and offers multiple opportunities to practice all the skills.
+Output format:  
 
-Output format:
-Theme name: [short, evocative title]
-Theme blurb: [4–6 sentences as described above]
-
-Examples:
-<example>
-atomic unit: Programming Syntax
-atomic skills: ["Data types", "Variables declaration and assignment", "Operators and their precedence", "Control flow (conditionals, loops)", "Functions definition and invocation", "Scope management", "Arrays and collections syntax", "Error handling", "String manipulation functions"]
-output:
-Fantasy Theme: Magic and Code
-In a realm where technology and magic intertwine, the world of Arcanecode is governed by the principles of programming and spellcasting. Wizards and sorcerers wielding arcane knowledge cast spells using intricate code syntax,
-with data types representing different magical elements—fire, water, earth, and air. Variables declaration and assignment are essential for assigning magical energies or resources, while operators and precedence dictate the
-order in which spells are combined. Control flow through conditionals and loops governs the decision-making processes of magic, such as casting protective shields until a specific condition is met. Functions definition and
-invocation allow for reusable spells and magical constructs, while scope management limits the effect of spells to certain areas or durations. Error handling is crucial for addressing failed spells or unexpected magical reactions,
-and string manipulation shapes and alters magical runes or incantations. In this world, the stakes are high—incorrect code can lead to disastrous consequences like spells backfiring or magical energy overflows. Being a skilled programmer
-in Arcanecode is not just a talent; it is essential for survival and success in a realm where magic is powered by code.
-
-</example>
-
-Our Atomic Skills: {atomic_skills}
-Our Kernels with Benefits: {kernels_with_benefits}
+Theme name: [short, evocative title]  
+Theme blurb: [two paragraphs as described above]  
         """
         model = get_llm()
 
         lc_messages = [SystemMessage(content=system_prompt)]
 
-        lc_messages.append(HumanMessage(content=f"My atomic skills are: {atomic_skills}"))
-        lc_messages.append(
-                HumanMessage(content=f"My kernels with benefits are: {kernels_with_benefits}")
-        )
+        lc_messages.append(HumanMessage(content=f"Atomic unit: {atomic_unit}"))
+        lc_messages.append(HumanMessage(content=f"Atomic skills: {atomic_skills}"))
         for msg in messages:
                 if msg["role"] == "user":
                         lc_messages.append(HumanMessage(content=msg["content"]))
                 else:
                         lc_messages.append(AIMessage(content=msg["content"]))
-
-        response = model.invoke(lc_messages)
-        return remove_think_block(response.content)
-
-
-def step3a(kernel: dict, setting: str | None = None) -> str:
-        """Find an analogy for a kernel while preserving its benefits.
-
-        Args:
-                kernel: The kernel data containing the text and benefits.
-                setting: Optional setting to influence the generated analogies.
-        """
-        system_prompt = """
-STEP 3A – ANALOGY FOR EACH KERNEL
-Given a kernel and its benefits, produce a concise analogy that explains the kernel and demonstrates why each of its benefits is important.
-
-Instructions:
-
-Provide 2 to 3 distinct analogies for each kernel.
-
-For each analogy, first state the analogy as a single-sentence header.
-
-Then, in a paragraph below the header, write the analogy.
-
-Below that explain how the analogy works.
-
-Within the explanation, use bold text to explicitly link each of the kernel's benefits to a corresponding part of the analogy.
-
-Example Kernel:
-Kernel: Record all categorized expenses in a financial tracking system.
-Benefits:
-- Enables accurate tracking of spending habits and identification of areas for savings.
-- Provides essential data for creating realistic budgets and achieving financial goals.
-- Facilitates quick detection of financial discrepancies or potential fraud.
-
-Desired Output Format:
-Analogy 1: [Your analogy header]
-[Paragraph describing the analogy]
-[Paragraph explaining the analogy, with bolded connections to each benefit]
-
-Analogy 2: [Your analogy header]
-[Paragraph describing the analogy]
-[Paragraph explaining the analogy, with bolded connections to each benefit]
-
-Analogy 3: [Your analogy header]
-[Paragraph describing the analogy]
-[Paragraph explaining the analogy, with bolded connections to each benefit]
-
-<example>
-Kernel: Record all categorized expenses in a financial tracking system.
-Benefits:
-- Enables accurate tracking of spending habits and identification of areas for savings.
-- Provides essential data for creating realistic budgets and achieving financial goals.
-- Facilitates quick detection of financial discrepancies or potential fraud.
-
-Analogy 1: Curating the Memories in a Time Traveler’s Archive
-A time traveler maintains an intricate archive of every moment they’ve visited — each memory stored in a crystal labeled by era, location, 
-and emotional tone — just like recording each expense in its correct financial category. After every jump, the traveler logs the exact 
-date, people met, and events witnessed, ensuring the timeline stays intact.
-In this analogy, reviewing which eras they revisit most often helps the traveler understand their personal patterns and biases, mirroring 
-how tracking expenses reveals spending habits and areas for savings. The archive also guides the traveler in planning future journeys to 
-prevent paradoxes and ensure they have enough chrono-energy for the trip, just as your records provide essential data for creating 
-realistic budgets and achieving financial goals. And if a crystal has been altered by a rival time traveler — a tiny change in the 
-hue or the recorded events — the archivist spots the distortion immediately, reflecting how quick detection of discrepancies or fraud 
-works in a financial tracking system.
-
-Analogy 2: Operating a Starship’s Navigation Log
-A starship captain keeps a precise navigation log that records every hyperspace jump, resource use, and cargo manifest — just like recording each 
-expense into the correct financial category. The log is updated after every mission, ensuring no data point is lost in the void.
-In this analogy, tracking the ship’s resource consumption across missions reveals where fuel, food, or energy is wasted, just as tracking categorized 
-expenses highlights spending habits and areas for savings. The navigation log also provides critical data for planning long voyages and allocating 
-supplies, mirroring how your expense records give essential information for creating realistic budgets and achieving financial goals. And if an 
-alien stowaway tampers with the cargo or a system glitch alters the coordinates, the captain can spot the irregularity immediately, just like 
-quick detection of discrepancies or potential fraud in a financial tracking system.
-
-Analogy 3: Maintaining a Wizard’s Spellbook
-A wise wizard keeps a meticulously organized spellbook, with each spell written under its proper school of magic — fire, illusion, healing, and so on — 
-just like recording each expense into the correct financial category. The wizard updates it after every magical encounter, ensuring no incantation is forgotten.
-In this analogy, tracking which spells are used most often lets the wizard see their strengths and weaknesses, just as tracking categorized expenses 
-reveals spending habits and areas for savings. The spellbook also guides the wizard when preparing for future battles or quests, just as your records 
-provide essential data for creating realistic budgets and achieving financial goals. And if a page has been tampered with by a mischievous imp, the 
-wizard spots the anomaly at once, mirroring how quick detection of financial discrepancies or fraud works in a tracking system.
-</example>
-        """
-        model = get_llm()
-        kernel_text = kernel.get("kernel")
-        benefits = kernel.get("why_it_matters") or []
-
-        lc_messages = [SystemMessage(content=system_prompt)]
-        lc_messages.append(HumanMessage(content=f"Kernel: {kernel_text}"))
-        if benefits:
-                lc_messages.append(HumanMessage(content=f"Benefits: {benefits}"))
-        if setting:
-                lc_messages.append(HumanMessage(content=f"Setting: {setting}"))
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
@@ -691,29 +580,6 @@ def remove_code_fences(text: str) -> str:
         text = text.replace("```", "")
         return text.strip()
 
-
-def step3(
-        atomic_skills, skill_kernels, kernels_with_benefits, messages: List[Dict[str, str]]
-) -> str:
-        """Generate analogies for each kernel and return them grouped by skill."""
-
-        analogies: dict = {}
-        if isinstance(kernels_with_benefits, dict):
-                for skill, kern_list in kernels_with_benefits.items():
-                        results = []
-                        if isinstance(kern_list, list):
-                                for kern in kern_list:
-                                        try:
-                                                analogy = step3a(kern)
-                                                results.append({
-                                                        "kernel": kern.get("kernel"),
-                                                        "analogy": analogy,
-                                                })
-                                        except Exception:
-                                                continue
-                        analogies[skill] = results
-
-        return json.dumps(analogies, indent=2)
 
 def step3_mapping(theme: str, skill_kernels) -> str:
         """Backward compatible wrapper for step3b."""
