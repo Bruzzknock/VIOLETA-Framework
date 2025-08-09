@@ -30,18 +30,6 @@ if submitted:
     app_utils.save_theme(theme_input)
     app_utils.save_theme_name(theme_name_input)
 
-for message in st.session_state.messages:
-    st.chat_message(message["role"]).write(message["content"])
-
-prompt = st.chat_input("Generate Ideas")
-if prompt:
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.spinner("Generating answer..."):
-        answer = ai.step3a(atomic_unit, atomic_skills, st.session_state.messages)
-    st.session_state.messages.append({"role": "assistant", "content": answer})
-    st.chat_message("user").write(prompt)
-    st.chat_message("assistant").write(answer)
-
 # ---------------------------------------------------------------------------
 # Step 3B – Kernel Theme Mapping
 
@@ -98,3 +86,16 @@ st.button("Generate Kernel Theme Mapping", on_click=generate_kernel_theme_mappin
 
 if st.button("Save Kernel Theme Mapping"):
     app_utils.save_kernel_theme_mapping(st.session_state.kernel_theme_text)
+
+
+for message in st.session_state.messages:
+    st.chat_message(message["role"]).write(message["content"])
+
+prompt = st.chat_input("Generate Ideas")
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.spinner("Generating answer..."):
+        answer = ai.step3a(atomic_unit, atomic_skills, st.session_state.messages)
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    st.chat_message("user").write(prompt)
+    st.chat_message("assistant").write(answer)
