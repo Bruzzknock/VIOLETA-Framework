@@ -577,8 +577,30 @@ def remove_code_fences(text: str) -> str:
 
 
 def step3_mapping(theme: str, skill_kernels) -> str:
-        """Backward compatible wrapper for step3b."""
-        return step3b(theme, skill_kernels)
+        """Run step3b for each provided kernel and merge the results."""
+        all_kernels = []
+        if isinstance(skill_kernels, dict):
+                for kern_list in skill_kernels.values():
+                        if isinstance(kern_list, list):
+                                all_kernels.extend(kern_list)
+        elif isinstance(skill_kernels, list):
+                all_kernels = skill_kernels
+
+        results = []
+        for kernel in all_kernels:
+                if not isinstance(kernel, dict):
+                        continue
+                generated = step3b(theme, [kernel])
+                try:
+                        parsed = json.loads(generated)
+                        if isinstance(parsed, dict):
+                                items = parsed.get("kernels")
+                                if isinstance(items, list) and items:
+                                        results.append(items[0])
+                except Exception:
+                        continue
+
+        return json.dumps({"kernels": results})
 
 
 def step4(theme: str, atomic_skills, messages: List[Dict[str, str]]) -> str:

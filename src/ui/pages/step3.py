@@ -96,20 +96,20 @@ def generate_kernel_mappings():
             if btexts:
                 kernel["benefits"] = btexts
 
-    results = []
     with st.spinner("Generating kernels..."):
-        for kernel in all_kernels:
-            generated = ai.step3b(theme_text, [kernel])
-            try:
-                parsed = json.loads(generated)
-                if isinstance(parsed, dict):
-                    items = parsed.get("kernels")
-                    if isinstance(items, list) and items:
-                        results.append(items[0])
-            except Exception:
-                continue
-    st.session_state.kernel_mappings = results
-    st.session_state.info_text = json.dumps({"kernels": results}, indent=2)
+        generated = ai.step3_mapping(theme_text, all_kernels)
+    try:
+        parsed = json.loads(generated)
+        if isinstance(parsed, dict):
+            items = parsed.get("kernels", [])
+            if isinstance(items, list):
+                st.session_state.kernel_mappings = items
+                st.session_state.info_text = json.dumps(parsed, indent=2)
+                return
+    except Exception:
+        pass
+    st.session_state.kernel_mappings = []
+    st.session_state.info_text = json.dumps({"kernels": []}, indent=2)
 
 
 st.button("Generate Kernels", on_click=generate_kernel_mappings)
