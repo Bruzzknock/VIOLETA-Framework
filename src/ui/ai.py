@@ -443,8 +443,13 @@ Our Kernels with Benefits: {kernels_with_benefits}
         return remove_think_block(response.content)
 
 
-def step3a(kernel: dict) -> str:
-        """Find an analogy for a kernel while preserving its benefits."""
+def step3a(kernel: dict, setting: str | None = None) -> str:
+        """Find an analogy for a kernel while preserving its benefits.
+
+        Args:
+                kernel: The kernel data containing the text and benefits.
+                setting: Optional setting to influence the generated analogies.
+        """
         system_prompt = """
 STEP 3A – ANALOGY FOR EACH KERNEL
 Given a kernel and its benefits, produce a concise analogy that explains the kernel and demonstrates why each of its benefits is important.
@@ -525,6 +530,8 @@ wizard spots the anomaly at once, mirroring how quick detection of financial dis
         lc_messages.append(HumanMessage(content=f"Kernel: {kernel_text}"))
         if benefits:
                 lc_messages.append(HumanMessage(content=f"Benefits: {benefits}"))
+        if setting:
+                lc_messages.append(HumanMessage(content=f"Setting: {setting}"))
 
         response = model.invoke(lc_messages)
         return remove_think_block(response.content)
