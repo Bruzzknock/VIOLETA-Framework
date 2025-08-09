@@ -3,27 +3,13 @@ import streamlit as st
 import app_utils
 import ai
 
-st.header("Step 3A - Pick a Candidate Theme")
-
 atomic_unit = app_utils.load_atomic_unit()
 atomic_skills = app_utils.load_atomic_skills()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-for message in st.session_state.messages:
-    st.chat_message(message["role"]).write(message["content"])
-
-prompt = st.chat_input("Generate Ideas")
-if prompt:
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.spinner("Generating answer..."):
-        answer = ai.step3a(atomic_unit, atomic_skills, st.session_state.messages)
-    st.session_state.messages.append({"role": "assistant", "content": answer})
-    st.chat_message("user").write(prompt)
-    st.chat_message("assistant").write(answer)
-
-st.header("Step 3B - Theme & Kernel Mapping")
+st.header("Step 3 - Theme & Kernel Mapping")
 
 theme = app_utils.load_theme()
 theme_name = app_utils.load_theme_name()
@@ -58,3 +44,14 @@ st.text_area("Step 3B Table (JSON)", key="info_text", height=200)
 if st.button("Save Additional Info"):
     app_utils.save_kernel_theme_mapping(st.session_state.info_text)
 
+for message in st.session_state.messages:
+    st.chat_message(message["role"]).write(message["content"])
+
+prompt = st.chat_input("Generate Ideas")
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.spinner("Generating answer..."):
+        answer = ai.step3a(atomic_unit, atomic_skills, st.session_state.messages)
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    st.chat_message("user").write(prompt)
+    st.chat_message("assistant").write(answer)
