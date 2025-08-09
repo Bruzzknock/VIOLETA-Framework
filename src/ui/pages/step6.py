@@ -4,6 +4,10 @@ import ai
 
 st.header("Step 6 - Form a Game (FAG)")
 
+atomic_unit = app_utils.load_atomic_unit()
+atomic_skills = app_utils.load_atomic_skills()
+theme_blurb = app_utils.load_theme()
+
 layer = app_utils.load_layered_feelings()
 if isinstance(layer, dict):
     layer_text = app_utils.layered_feelings_to_text(layer)
@@ -63,7 +67,14 @@ prompt = st.chat_input("Generate Ideas")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.spinner("Generating answer..."):
-        answer = ai.step6_mechanic_ideas(layer_text, medium, st.session_state.messages)
+        answer = ai.step6_mechanic_ideas(
+            layer_text,
+            medium,
+            atomic_unit,
+            atomic_skills,
+            theme_blurb,
+            st.session_state.messages,
+        )
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)
