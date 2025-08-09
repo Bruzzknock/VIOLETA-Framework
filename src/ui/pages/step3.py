@@ -42,6 +42,12 @@ if "kernel_analogies" not in st.session_state:
 if "generated_analogies" not in st.session_state:
     st.session_state.generated_analogies = []
 
+# Handle clearing inputs triggered after saving
+if st.session_state.get("reset_inputs"):
+    st.session_state.manual_analogy = ""
+    st.session_state.analogy_setting = ""
+    st.session_state.reset_inputs = False
+
 
 def parse_analogies(text: str) -> list[str]:
     blocks: list[str] = []
@@ -98,8 +104,7 @@ if st.session_state.kernel_index < total:
         app_utils.save_kernel_analogies(st.session_state.kernel_analogies)
         st.session_state.kernel_index += 1
         st.session_state.generated_analogies = []
-        st.session_state.manual_analogy = ""
-        st.session_state.analogy_setting = ""
+        st.session_state.reset_inputs = True
         st.experimental_rerun()
 else:
     st.success("All kernels processed.")
