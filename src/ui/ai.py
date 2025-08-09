@@ -480,6 +480,24 @@ Output format:
         return remove_think_block(response.content)
 
 
+def step3b_all(theme: str, kernels_with_benefits: List[Dict]) -> Dict:
+        """Run step3b separately for each kernel and merge the results."""
+
+        combined = {"kernels": []}
+        for kern in kernels_with_benefits:
+                result = step3b(theme, [kern])
+                cleaned = remove_code_fences(result)
+                try:
+                        parsed = json.loads(cleaned)
+                        if isinstance(parsed, dict) and "kernels" in parsed:
+                                combined["kernels"].extend(parsed["kernels"])
+                        else:
+                                combined["kernels"].append(parsed)
+                except Exception:
+                        combined["kernels"].append(cleaned)
+        return combined
+
+
 def step2(atomic_unit, messages: List[Dict[str, str]]) -> str:
         """Return a chat-based response for choosing atomic skills."""
         system_prompt = """
