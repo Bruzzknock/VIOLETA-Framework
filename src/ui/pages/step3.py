@@ -3,6 +3,14 @@ import streamlit as st
 import app_utils
 import ai
 
+
+def _rerun() -> None:
+    """Trigger a Streamlit rerun compatible across versions."""
+    if hasattr(st, "rerun"):
+        st.rerun()
+    else:
+        st.experimental_rerun()
+
 st.header("Step 3A - Kernel Analogies")
 
 skill_kernels = app_utils.load_skill_kernels()
@@ -105,7 +113,7 @@ if st.session_state.kernel_index < total:
         st.session_state.kernel_index += 1
         st.session_state.generated_analogies = []
         st.session_state.reset_inputs = True
-        st.experimental_rerun()
+        _rerun()
 else:
     st.success("All kernels processed.")
     st.subheader("Selected Analogies")
