@@ -63,10 +63,14 @@ if st.session_state.kernel_index < total:
     st.subheader(f"Kernel {st.session_state.kernel_index + 1} of {total}")
     st.markdown(f"**{k.get('kernel', '')}**")
     manual = st.text_area("Write your own analogies (one per line)", key="manual_analogy")
+    setting = st.text_input(
+        "Optional setting for generated analogies (e.g., fantasy, sci-fi)",
+        key="analogy_setting",
+    )
 
     if st.button("Generate analogies"):
         with st.spinner("Generating analogies..."):
-            raw = ai.step3a(k)
+            raw = ai.step3a(k, setting=setting)
         st.session_state.generated_analogies = parse_analogies(raw)
 
     for idx, ana in enumerate(st.session_state.generated_analogies):
@@ -94,6 +98,7 @@ if st.session_state.kernel_index < total:
         st.session_state.kernel_index += 1
         st.session_state.generated_analogies = []
         st.session_state.manual_analogy = ""
+        st.session_state.analogy_setting = ""
         st.experimental_rerun()
 else:
     st.success("All kernels processed.")
