@@ -430,25 +430,43 @@ def step3b(theme: str, kernels_with_benefits) -> str:
         """Map kernels and their benefits into the chosen theme."""
         system_prompt = """
 ### STEP 3B – KERNEL ANALOGIES
-Given a theme description and a list of kernels with their benefits, rewrite each
-kernel so that it fits the theme. For every kernel supply an in-world input,
-an action verb, and an in-world output that preserves the original
-Input → Transformation → Output logic and conveys the listed benefits.
 
-Return the result as JSON with this structure:
+Given:
+1. A theme description.
+2. A list of kernels (each with original input, verb, output, learning type, and linked benefits).
+
+Task:
+For each kernel, rewrite it so it fits naturally and consistently within the given theme’s world. 
+
+Rules:
+- Preserve the original Input → Verb → Output logic exactly, but express it entirely in in-world terms that make sense in the theme. 
+- Do NOT use any direct synonyms or vocabulary from the original real-world domain unless they are logically part of the theme.
+- The in-world Input must be semantically equivalent to the original Input.
+- The in-world Output must be semantically equivalent to the original Output.
+- The in-world Verb must perform the same transformation between input and output.
+- For each benefit, explicitly describe how it manifests in-world.
+- Mark `"preserved": "Y"` only if all three elements (Input, Verb, Output) are fully preserved in meaning.
+
+Output format:
 {
-  "theme": "<theme>",
   "kernels": [
     {
-      "kernel": "<original skill name>",
-      "benefits": ["<benefit1>", "<benefit2>"] ,
-      "input": "<in-world input>",
-      "verb": "<action>",
-      "output": "<in-world output>",
+      "kernel": "<original kernel sentence>",
+      "original_input": "<original input>",
+      "original_verb": "<original verb>",
+      "original_output": "<original output>",
+      "in_world_input": "<rewritten input in theme terms>",
+      "in_world_verb": "<rewritten verb in theme terms>",
+      "in_world_output": "<rewritten output in theme terms>",
+      "in_world_kernel_sentence": "<single sentence combining in-world input, verb, and output>",
+      "benefit_mapping": [
+        { "benefit": "<benefit sentence>", "in_world_effect": "<benefit expressed in theme terms>" }
+      ],
       "preserved": "Y" or "N"
     }
   ]
 }
+
         """
         model = get_llm()
 
