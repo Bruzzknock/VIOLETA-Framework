@@ -31,6 +31,9 @@ medium = st.session_state.get("medium", "Video games")
 
 # ---------------------------------------------------------------------------
 # Load data
+atomic_unit = app_utils.load_atomic_unit()
+atomic_skills = app_utils.load_atomic_skills()
+theme_blurb = app_utils.load_theme()
 bmt = app_utils.load_base_mechanics_tree()
 if isinstance(bmt, dict):
     bmt_text = app_utils.layered_feelings_to_text(bmt)
@@ -224,7 +227,14 @@ if prompt:
             )
         else:
             mech = st.session_state.get("current", "") or bmt_text
-            answer = ai.step7_mvp_ideas(mech, medium, st.session_state.messages)
+            answer = ai.step7_mvp_ideas(
+                mech,
+                medium,
+                atomic_unit,
+                atomic_skills,
+                theme_blurb,
+                st.session_state.messages,
+            )
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("user").write(prompt)
     st.chat_message("assistant").write(answer)

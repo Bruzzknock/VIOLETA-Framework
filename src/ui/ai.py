@@ -716,12 +716,21 @@ Back-ups
 
 
 def step6_mechanic_ideas(
-    layered_feelings: str, medium: str, messages: List[Dict[str, str]]
+    layered_feelings: str,
+    medium: str,
+    atomic_unit: str,
+    atomic_skills,
+    theme_blurb: str,
+    messages: List[Dict[str, str]],
 ) -> str:
         """Suggest mechanics for each feeling."""
 
         system_prompt = f"""
 ### STEP 6A – Map Feelings to Mechanics
+
+Atomic unit: {atomic_unit}
+Atomic skills: {atomic_skills}
+Theme: {theme_blurb}
 
 You are brainstorming **{medium} mechanics** that could evoke each emotional
 state listed below. Return concise suggestions using the format
@@ -756,11 +765,22 @@ Constant pressure: Tight margin of success
         return remove_think_block(response.content)
 
 
-def step7_mvp_ideas(mechanic: str, medium: str, messages: List[Dict[str, str]]) -> str:
+def step7_mvp_ideas(
+    mechanic: str,
+    medium: str,
+    atomic_unit: str,
+    atomic_skills,
+    theme_blurb: str,
+    messages: List[Dict[str, str]],
+) -> str:
         """Suggest schema breakdowns for building the MVP."""
 
         system_prompt = f"""
 ### STEP 7 – From Base Mechanics Tree to MVP (Recursive)
+
+Atomic unit: {atomic_unit}
+Atomic skills: {atomic_skills}
+Theme: {theme_blurb}
 
 We are designing for {medium.lower()}. Break down the mechanic "{mechanic}" step by step.
 Encourage the user to identify concrete game elements, then ask how each one
